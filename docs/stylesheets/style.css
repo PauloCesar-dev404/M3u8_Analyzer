@@ -1,0 +1,139 @@
+/* Geral */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo para funções e métodos */
+.func {
+    color: #0031e0; /* Azul para funções e métodos */
+}
+
+/* Estilo para parênteses e outros delimitadores */
+.opens {
+    color: #8300e0; /* Roxo para parênteses e delimitadores */
+}
+
+/* Estilo para parâmetros e variáveis */
+.param {
+    color: #a3a3a3; /* Cinza para parâmetros e variáveis */
+}
+
+/* Estilo para strings */
+.string {
+    color: #007bff; /* Azul claro para strings */
+}
+
+/* Estilo para comentários */
+.comment {
+    color: #008000; /* Verde para comentários */
+}
+
+/* Cabeçalho */
+header.logo {
+    background-color: #4CAF50; /* Cor de fundo do cabeçalho */
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+/* Conteúdo principal */
+.content {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* Estilo para o menu de abas */
+.tabs {
+    overflow: hidden;
+    background-color: #f1f1f1;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 5px 5px 0 0;
+}
+
+.tab-button {
+    background-color: #ddd;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 20px;
+    transition: background-color 0.3s, border-color 0.3s;
+    font-size: 16px;
+    border-radius: 5px 5px 0 0;
+    margin: 0;
+    display: inline-block;
+    text-align: center;
+}
+
+.tab-button:hover {
+    background-color: #ccc;
+}
+
+.tab-button.active {
+    background-color: #4CAF50;
+    color: white;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 0 0 5px 5px;
+    background-color: #fff;
+}
+
+/* Estilos para os títulos e exemplos de código */
+.content h2 {
+    margin-top: 0;
+    font-size: 24px;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 10px;
+}
+
+pre code {
+    display: block;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: monospace;
+}
+
+/* Estilo para links e botões */
+a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+.copy-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px;
+}
+
+.copy-button svg {
+    fill: #888;
+    transition: fill 0.2s;
+}
+
+.copy-button:hover svg {
+    fill: #333;
+}
+
+pre {
+    position: relative;
+    padding-right: 40px;
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3u8_Analyzer</title>
+    <link rel="stylesheet" href="stylesheets/style.css">
+</head>
+<body>
+    <header class="logo">
+        <h1>M3u8_Analyzer</h1>
+        <h3>1.0.0.0</h3>
+    </header>
+    <div class="content">
+        <!-- Menu com os métodos da biblioteca -->
+        <div class="tabs">
+            <button class="tab-button" onclick="openTab(event, 'install')">Instalação</button>
+            <button class="tab-button" onclick="openTab(event, 'get_m3u8')">Obter Conteúdo de uma URL M3U8</button>
+            <button class="tab-button" onclick="openTab(event, 'get_type_m3u8_content')">Obter o Tipo da Playlist</button>
+            <button class="tab-button" onclick="openTab(event, 'get_high_resolution')">Obter Melhor Resolução</button>
+            <button class="tab-button" onclick="openTab(event, 'get_player_playlist')">Obter Player</button>
+            <button class="tab-button" onclick="openTab(event, 'get_audio_playlist')">Obter URL de Playlist de Áudio</button>
+            <button class="tab-button" onclick="openTab(event, 'remuxer_audio_and_video')">Remuxar Áudio e Vídeo</button>
+        </div>
+
+        <div id="install" class="tab-content">
+            <h1>Instalação da lib em seu ambiente</h1>
+            <p>Para instalar a biblioteca, use o seguinte comando:</p>
+            <pre><code><span class="func">pip</span> <span class="opens">install</span> <span class="string">gi+https://github.com/PauloCesar-dev404/M3u8Analyzer</span></code></pre>
+        </div>
+
+        <div id="get_m3u8" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">get_m3u8</span><span class="opens">(</span><span class="param">url_m3u8</span>, <span class="param">headers</span>, <span class="param">save_in_file</span><span class="opens">)</span></h2>
+            <p>Obtém o conteúdo de um arquivo M3U8 a partir de uma URL HLS. Lembre-se de que deve ser uma URL válida .m3u8.</p>
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>url_m3u8</code> (str): A URL do arquivo M3U8.</li>
+                <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP a serem enviados com a solicitação.</li>
+                <li><code>save_in_file</code> (str, opcional): O caminho para salvar o conteúdo M3U8 em um arquivo.</li>
+            </ul>
+            <p><strong>Retorno:</strong></p>
+            <p><code>str</code>: O conteúdo do arquivo M3U8 como string.</p>
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Obtendo o conteúdo do M3U8</span>
+m3u8_content = <span class="func">get_m3u8</span>(<span class="param">"http://example.com/playlist.m3u8"</span>)
+print(m3u8_content)
+
+<span class="comment"># Salvando o conteúdo em um arquivo</span>
+<span class="func">get_m3u8</span>(<span class="param">"http://example.com/playlist.m3u8"</span>, <span class="param">save_in_file="playlist.m3u8"</span>)</code></pre>
+        </div>
+
+        <div id="get_type_m3u8_content" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">get_type_m3u8_content</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
+            <p>Determina o tipo de conteúdo de um arquivo M3U8.</p>
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>m3u8_content</code> (str): O conteúdo do arquivo M3U8.</li>
+            </ul>
+            <p><strong>Retorno:</strong></p>
+            <p><code>str</code>: O tipo de conteúdo identificado.</p>
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
+m3u8_content = <span class="string">"""#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
+http://example.com/1080p.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720
+http://example.com/720p.m3u8"""</span>
+
+<span class="comment"># Determinando o tipo de conteúdo</span>
+tipo = <span class="func">get_type_m3u8_content</span>(m3u8_content)
+print(tipo)  <span class="comment"># Saída: 'Master'</span></code></pre>
+        </div>
+
+        <div id="get_high_resolution" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">get_high_resolution</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
+            <p>Obtém a maior resolução disponível em um arquivo M3U8 e o URL correspondente.</p>
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>m3u8_content</code> (str): O conteúdo do arquivo M3U8.</li>
+            </ul>
+            <p><strong>Retorno:</strong></p>
+            <p><code>Tuple[str, str]</code>: Uma tupla com a maior resolução e o URL correspondente.</p>
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
+m3u8_content = <span class="string">"""#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
+http://example.com/1080p.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720
+http://example.com/720p.m3u8"""</span>
+
+<span class="comment"># Obtendo a maior resolução</span>
+resolucao, url = <span class="func">get_high_resolution</span>(m3u8_content)
+print(<span class="string">f"Resolução: {resolucao}, URL: {url}"</span>)
+<span class="comment"># Saída: Resolução: 1920x1080, URL: http://example.com/1080p.m3u8</span></code></pre>
+        </div>
+
+        <div id="get_player_playlist" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">get_player_playlist</span><span class="opens">(</span><span class="param">m3u8_url</span><span class="opens">)</span></h2>
+            <p>Obtém o caminho do diretório base do arquivo M3U8.</p>
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>m3u8_url</code> (str): A URL completa do arquivo M3U8.</li>
+            </ul>
+            <p><strong>Retorno:</strong></p>
+            <p><code>str</code>: O caminho do diretório base.</p>
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="func"># URL do M3U8</span>
+m3u8_url = <span class="string">"http://example.com/streams/1080p.m3u8"</span>
+
+<span class="comment"># Obtendo o caminho do diretório base</span>
+diretorio_base = <span class="func">get_player_playlist</span>(m3u8_url)
+print(<span class="string">diretorio_base</span>)  <span class="comment"># Saída: http://example.com/streams/</span></code></pre>
+        </div>
+
+        <div id="get_audio_playlist" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">get_audio_playlist</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
+            <p>Extrai o URL da playlist de áudio do conteúdo M3U8.</p>
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>m3u8_content</code> (str): O conteúdo do arquivo M3U8.</li>
+            </ul>
+            <p><strong>Retorno:</strong></p>
+            <p><code>str</code>: A URL da playlist de áudio.</p>
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
+m3u8_content = <span class="string">"""#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
+http://example.com/1080p.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720
+http://example.com/720p.m3u8
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="English",DEFAULT=YES,AUTOSELECT=YES,LANGUAGE="eng",URI="http://example.com/audio/playlist.m3u8"""</span>
+
+<span class="comment"># Obtendo o URL da playlist de áudio</span>
+audio_playlist = <span class="func">get_audio_playlist</span>(m3u8_content)
+print(audio_playlist)  <span class="comment"># Saída: http://example.com/audio/playlist.m3u8</span></code></pre>
+        </div>
+
+        <div id="remuxer_audio_and_video" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">remuxer_audio_and_video</span><span class="opens">(</span><span class="param">video_url</span>, <span class="param">audio_url</span>, <span class="param">output_file</span><span class="opens">)</span></h2>
+            <p>Remuxa os arquivos de áudio e vídeo em um único arquivo de saída.</p>
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>video_url</code> (str): URL do arquivo de vídeo.</li>
+                <li><code>audio_url</code> (str): URL do arquivo de áudio.</li>
+                <li><code>output_file</code> (str): Caminho para o arquivo de saída.</li>
+            </ul>
+            <p><strong>Retorno:</strong></p>
+            <p><code>None</code>: A função salva o arquivo no caminho especificado.</p>
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># URLs dos arquivos de vídeo e áudio</span>
+video_url = <span class="string">"http://example.com/video.mp4"</span>
+audio_url = <span class="string">"http://example.com/audio.mp3"</span>
+output_file = <span class="string">"output.mp4"</span>
+
+<span class="comment"># Remuxando áudio e vídeo</span>
+<span class="func">remuxer_audio_and_video</span>(video_url, audio_url, output_file)</code></pre>
+        </div>
+    </div>
+    <script src="scripts/script.js"></script>
+</body>
+</html>
