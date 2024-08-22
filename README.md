@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-  <code>version: 1.0.0</code> | <code>author: PauloCesar-dev404</code> | <code>LICENSE: MIT</code>
+  <code>version: 1.0.1</code> | <code>author: PauloCesar-dev404</code> | <code>LICENSE: MIT</code>
 </p>
 
 
