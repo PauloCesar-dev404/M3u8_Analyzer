@@ -6,6 +6,7 @@ long_description = (pathlib.Path(__file__).parent / "README.md").read_text(encod
 
 setup(
     name="m3u8_analyzer",
+    url='https://paulocesar-dev404.github.io/M3u8_Analyzer/',
     version="1.0.0",
     license="MIT",
     author="PauloCesar0073-dev404",
@@ -16,6 +17,5 @@ setup(
     keywords=["hls", "m3u8"],
     packages=["m3u8_analyzer"],
     install_requires=['cryptography', 'requests'],
-    url="https://github.com/PauloCesar0073-dev404/m3u8_analyzer",  # Substitua pela URL do seu repositório
     include_package_data=True,  # Inclui dados adicionais do pacote, como README.md
 )
