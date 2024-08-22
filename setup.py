@@ -14,7 +14,7 @@ setup(
     description="Análise de dados de HLS m3u8",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    keywords=["hls", "m3u8"],
+    keywords=["hls", "m3u8","m3u8analyzer","m3u8_analyzer","M3u8Analyzer","M3u8_Analyzer"],
     packages=["m3u8_analyzer"],
     install_requires=['cryptography', 'requests'],
     include_package_data=True,  # Inclui dados adicionais do pacote, como README.md
