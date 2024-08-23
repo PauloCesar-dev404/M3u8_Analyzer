@@ -29,10 +29,35 @@
             <button class="tab-button" onclick="openTab(event, 'get_url_key_m3u8')">Obter chave de criptografia AES-128 e o IV de um conteúdo M3U8</button>            
             <button class="tab-button" onclick="openTab(event, 'downloader_and_remuxer_segments')">Baixar uma playlist M3U8 segmentos por segmentos(suporte a descriptografia)</button>
             <button class="tab-button" onclick="openTab(event, 'ffmpeg')">usar ffmpeg para baixar uma Playlist M3U8</button>
+            <button class="tab-button" onclick="openTab(event, 'delte-bins')">Como Apagar os binários da lib do meu ambiente?</button>
 
 
 
         </div>
+
+        <div id="delte-bins" class="tab-content">
+            <h1>Remover Binários</h1>
+            <p>Este script remove os binários da biblioteca do seu ambiente de desenvolvimento(ffmpeg,arquivos de configurações)</p>
+            
+            <p><strong>Como Usar:</strong></p>
+            <p>Execute o script apropriado para o seu sistema operacional com o seu ambiente virtual ativado onde a biblioteca está instalada.</p>
+            
+            <p><strong>Para Linux:</strong></p>
+            <pre><code><span class="comment"># No terminal com seu ambiente virtual ativado</span>
+        remove_ffmpeg.sh</code></pre>
+            
+            <p><strong>Para Windows:</strong></p>
+            <pre><code><span class="comment"># No prompt de comando com seu ambiente virtual ativado</span>
+        remove_ffmpeg.bat</code></pre>
+        
+        </div>
+        
+        
+
+
+
+
+
 
         <div id="get_url_key_m3u8" class="tab-content">
             <h1>Método:</h1>
