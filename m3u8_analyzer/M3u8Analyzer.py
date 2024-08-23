@@ -1,8 +1,8 @@
 import re
 import shutil
-import site
 import time
 import uuid
+import cryptography.exceptions
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
@@ -10,12 +10,17 @@ import subprocess
 import os
 import sys
 import requests
+from .__constants import INSTALL_DIR, FFMPEG_BINARY
 
 __author__ = 'PauloCesar0073-dev404'
-__version__ = '1.0.0.0'
+__version__ = '1.0.2'
 __ossystem = os.name
+HOME = INSTALL_DIR
+ffmpeg_bin = os.path.join(INSTALL_DIR, FFMPEG_BINARY)
 
-ffmpeg_bin = os.path.join(site.getsitepackages()[0], 'Lib', 'site-packages', 'm3u8_analyzer', 'bin')
+temp_dir = '.TEMPs'
+if not os.path.exists(temp_dir):
+    os.makedirs(temp_dir, exist_ok=True)
 
 
 class M3u8Analyzer:
@@ -176,7 +181,7 @@ class M3u8Analyzer:
                 key_bytes = resp.content
                 key_hex = key_bytes.hex()
                 data['key'] = key_hex
-                data['iv'] = iv_hex
+                data['iv'] = iv_hex.split('0x')[1]
                 return data
             else:
                 return None
@@ -186,10 +191,11 @@ class M3u8Analyzer:
         @staticmethod
         def downloader_and_remuxer_segments(url_playlist: str, output: str, key_hex: str = None,
                                             iv_hex: str = None,
-                                            player: str = None, headers: dict = None, segmentsType: str = None):
+                                            player: str = None, headers: dict = None,
+                                            segmentsType: str = None):
             """
             Baixa os segmentos de uma playlist M3U8 e os combina em um arquivo de vídeo.
-
+            :param segmentsType: tipo de segmentos de saída
             :param url_playlist: URL da playlist de segmentos.
             :param output: Caminho de saída para o vídeo final (dir/nome.mp4).
             :param key_hex: Chave de descriptografia em formato hexadecimal (opcional).
@@ -204,14 +210,10 @@ class M3u8Analyzer:
             resposta.raise_for_status()
             playlist = resposta.text
             urls_segmentos = [linha for linha in playlist.splitlines() if linha and not linha.startswith('#')]
-
-            temp_dir = 'TEMPs'
-            os.makedirs(temp_dir, exist_ok=True)
             arquivos_temporarios = []
             extens = '.ts'
             try:
                 for i, url_segmento in enumerate(urls_segmentos):
-
                     if segmentsType:
                         if '.m4s' in segmentsType:
                             extens = '.m4s'
@@ -222,24 +224,29 @@ class M3u8Analyzer:
                             url_segmento = f"{player}{url_segmento}"
                         else:
                             raise ValueError("Não há URL base para os segmentos.")
-                    sys.stdout.write(f"\rBaixando Segmentos [{i + 1}/{len(urls_segmentos)}]")
-                    sys.stdout.flush()
                     if key_hex and iv_hex:
                         key = bytes.fromhex(key_hex)
                         iv = bytes.fromhex(iv_hex)
-                        M3u8Analyzer.M3u8AnalyzerDownloader.__baixar_segmento(url_segmento, arquivo_temporario, key, iv,
-                                                                              headers)
+                        M3u8Analyzer.M3u8AnalyzerDownloader.__baixar_segmento(url_segmento=url_segmento,
+                                                                              path=arquivo_temporario,
+                                                                              key=key,
+                                                                              iv=iv,
+                                                                              headers=headers,
+                                                                              index=i + 1,
+                                                                              total=len(urls_segmentos))
                     else:
-                        M3u8Analyzer.M3u8AnalyzerDownloader.__baixar_segmento(url_segmento, arquivo_temporario,
-                                                                              headers=headers)
-
+                        M3u8Analyzer.M3u8AnalyzerDownloader.__baixar_segmento(url_segmento=url_segmento,
+                                                                              path=arquivo_temporario,
+                                                                              headers=headers,
+                                                                              index=i + 1,
+                                                                              total=len(urls_segmentos))
                 # Concatena os segmentos em um arquivo de vídeo final
                 M3u8Analyzer.M3u8AnalyzerDownloader.__ffmpeg_concatener(output=output, extension=extens)
-
             except OSError as e:
-                raise ValueError(f"O vídeo parece não ser válido: {e}")
+                pass
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
                 print(f"\nErro de conexão: {e}")
+                # Remover arquivos e diretórios temporários de forma robusta
             finally:
                 # Remover arquivos temporários
                 for arquivo in arquivos_temporarios:
@@ -248,18 +255,25 @@ class M3u8Analyzer:
                             os.remove(arquivo)
                         except OSError as e:
                             print(f"Erro ao remover o arquivo {arquivo}: {e}")
-                # Remover diretório temporário
-                if os.path.isdir(temp_dir):
+                # Remover o diretório temporário
+                if os.path.exists(temp_dir):
                     try:
-                        os.rmdir(temp_dir)
+                        sys.stdout.flush()  # Certificar-se de que toda a saída foi impressa antes de remover o diretório
+                        shutil.rmtree(temp_dir, ignore_errors=True)
+                    except PermissionError as e:
+                        print(f"Permissão negada ao tentar remover o diretório {temp_dir}: {e}")
                     except OSError as e:
                         print(f"Erro ao remover o diretório {temp_dir}: {e}")
+                    except Exception as e:
+                        print(f"Erro inesperado ao remover o diretório {temp_dir}: {e}")
 
         @staticmethod
-        def __baixar_segmento(url_segmento: str, path: str, key: bytes = None, iv: bytes = None,
+        def __baixar_segmento(url_segmento: str, path: str, index, total, key: bytes = None, iv: bytes = None,
                               headers: dict = None):
+            global Novideo,Noaudio
             """
             Baixa um segmento de vídeo e, se necessário, o descriptografa.
+            Em seguida, verifica se o vídeo possui áudio.
 
             :param url_segmento: URL do segmento.
             :param path: Caminho de saída para salvar o segmento.
@@ -268,20 +282,50 @@ class M3u8Analyzer:
             :param headers: Cabeçalhos HTTP adicionais para a requisição (opcional).
             :return: None
             """
+            # Baixar o segmento
             resposta = requests.get(url_segmento, headers=headers, stream=True)
             resposta.raise_for_status()
             total_bytes = 0
             chunk_size = 1024  # Definir o tamanho do chunk (1 KB)
+            print(f"Baixando Segmentos [{index}/{total}]", end=" ")
             with open(path, 'wb') as arquivo_segmento:
                 for chunk in resposta.iter_content(chunk_size=chunk_size):
                     if chunk:
                         arquivo_segmento.write(chunk)
                         total_bytes += len(chunk)
+                arquivo_segmento.close()
 
             # Descriptografar se necessário
             if key and iv:
+                M3u8Analyzer.M3u8AnalyzerDownloader.__descriptografar_segmento(path, key, iv)
+            # Verificar se o vídeo tem áudio e vídeo
+            has_audio = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_audio(path)
+            has_video = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_video(path)
+            if has_audio:
+                Noaudio = None
+            else:
+                print(" NOT audio ")
+                Noaudio = True
+            if has_video:
+                Novideo = None
+            else:
+                Novideo = True
+                print(" NOT video ")
+
+        @staticmethod
+        def __descriptografar_segmento(path: str, key: bytes, iv: bytes):
+            """
+            Descriptografa um segmento de vídeo se necessário.
+
+            :param path: Caminho do arquivo a ser descriptografado.
+            :param key: Chave de descriptografia em bytes.
+            :param iv: IV (vetor de inicialização) em bytes.
+            :return: None
+            """
+            try:
                 with open(path, 'rb') as arquivo_segmento:
                     segmento_bytes = arquivo_segmento.read()
+
                 backend = default_backend()
                 cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                 decryptor = cipher.decryptor()
@@ -291,16 +335,74 @@ class M3u8Analyzer:
 
                 with open(path, 'wb') as arquivo_segmento:
                     arquivo_segmento.write(segment)
-            # Adicionar uma nova linha após o fim do download
-            sys.stdout.write("\r")
+            except Exception as e:
+                raise ValueError(f"erro ao descriptografar {e}")
+
+        @staticmethod
+        def __verificar_audio(path: str) -> bool:
+            """
+            Verifica se o vídeo contém faixas de áudio usando ffmpeg.
+
+            :param path: Caminho do arquivo de vídeo.
+            :return: True se o vídeo contiver áudio, False caso contrário.
+            """
+            try:
+                # Comando para obter informações sobre o arquivo usando ffmpeg
+                resultado = subprocess.run(
+                    [ffmpeg_bin, '-i', path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                # Procurar por linhas contendo "Audio:" no stderr
+                return 'Audio:' in resultado.stderr
+            except FileNotFoundError:
+                sys.stderr.write(
+                    "ffmpeg não encontrado..\n")
+                return False
+            except subprocess.CalledProcessError as e:
+                sys.stderr.write(f"Erro ao executar ffmpeg: {e}\n")
+                return False
+
+        @staticmethod
+        def __verificar_video(path: str) -> bool:
+            """
+            Verifica se o vídeo contém faixas de vídeo usando ffmpeg.
+
+            :param path: Caminho do arquivo de vídeo.
+            :return: True se o vídeo contiver vídeo, False caso contrário.
+            """
+            try:
+                # Comando para obter informações sobre o arquivo usando ffmpeg
+                resultado = subprocess.run(
+                    [ffmpeg_bin, '-i', path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                # Procurar por linhas contendo "Video:" no stderr
+                return 'Video:' in resultado.stderr
+            except FileNotFoundError:
+                sys.stderr.write(
+                    "ffmpeg não encontrado..\n")
+                return False
+            except subprocess.CalledProcessError as e:
+                sys.stderr.write(f"Erro ao executar ffmpeg: {e}\n")
+                return False
 
         @staticmethod
         def __clear_line():
             """
-            Limpa a linha atual no terminal usando códigos de escape ANSI.
+            Limpa a linha atual no terminal de forma compatível com diferentes sistemas.
+
+            Essa função utiliza o caractere de retrocesso para mover o cursor para o
+            início da linha e sobrescreve o conteúdo da linha com espaços em branco,
+            limpando assim a linha no terminal.
+
             :return: None
             """
-            sys.stdout.write('\r' + ' ' * shutil.get_terminal_size().columns + '\r')
+            # Mover o cursor para o início da linha e sobrescrever com espaços
+            sys.stdout.write('\r' + ' ' * 100 + '\r')
             sys.stdout.flush()
 
         @staticmethod
@@ -330,14 +432,14 @@ class M3u8Analyzer:
             :return: None
             """
             # Defina o nome do arquivo de lista
-            arquivo_lista = 'lista.txt'
+            arquivo_lista = fr'{temp_dir}\lista.txt'
 
             def extrair_numero(nome_arquivo):
                 match = re.search(r'(\d+)', nome_arquivo)
                 return int(match.group(1)) if match else float('inf')
 
             # Defina o diretório onde estão os arquivos .ts
-            diretorio_ts = 'TEMPs'
+            diretorio_ts = temp_dir
             # Abre o arquivo lista.txt para escrita
             with open(arquivo_lista, 'w') as f:
                 # Lista todos os arquivos no diretório e filtra apenas os arquivos .ts
@@ -348,7 +450,6 @@ class M3u8Analyzer:
                 for arquivo in arquivos_ts:
                     caminho_absoluto = os.path.join(diretorio_ts, arquivo)
                     f.write(f"file '{caminho_absoluto}'\n")
-            ffmpeg_exe = 'ffmpeg' if os.name == 'posix' else 'ffmpeg.exe'
             cmd = [
                 fr'{ffmpeg_bin}',
                 '-y',
@@ -369,10 +470,19 @@ class M3u8Analyzer:
                 if output:
                     if M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output(output, index):
                         index += 1  # Incrementa o índice apenas se a linha corresponder ao filtro
-            M3u8Analyzer.M3u8AnalyzerDownloader.__clear_line()
-
-            sys.stdout.write('\nProcesso finalizado!\n')
-            sys.stdout.flush()
+            if Noaudio:
+                print(f'Video foi salvo mais não tem áudio!', end='')
+                print("obtenha a playlist de áudio e a remuxe nesse vídeo")
+                sys.stdout.flush()
+            if Novideo:
+                print(f'Video foi salvo mais não tem vídeo!', end='')
+                print(" obtenha a playlist de áudio e a remuxe nesse áudio")
+                sys.stdout.flush()
+            print("Processo Finalisado: ", end=" ")
+            if Noaudio is None:
+                print("Audio\t\t\tOK", end="")
+            if Novideo:
+                print("Video\t\t\tOK", end="")
 
         @staticmethod
         def ffmpeg(input_url: str, output: str, type_playlist: str, resolution: str = None):
@@ -483,3 +593,4 @@ class M3u8Analyzer:
                 except Exception:
                     pass
             print('Remuxing concluído!')
+
