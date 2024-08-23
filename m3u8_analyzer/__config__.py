@@ -9,7 +9,7 @@ from http.client import IncompleteRead
 
 from colorama import Fore, Style
 
-v = '1.0.2.3'
+v = '1.0.2.4'
 
 
 class Configurate:

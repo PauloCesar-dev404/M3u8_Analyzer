@@ -30,11 +30,12 @@
             <button class="tab-button" onclick="openTab(event, 'downloader_and_remuxer_segments')">Baixar uma playlist M3U8 segmentos por segmentos(suporte a descriptografia)</button>
             <button class="tab-button" onclick="openTab(event, 'ffmpeg')">usar ffmpeg para baixar uma Playlist M3U8</button>
             <button class="tab-button" onclick="openTab(event, 'delte-bins')">Como Apagar os binários da lib do meu ambiente?</button>
-
+            <button class="tab-button" onclick="openTab(event, 'ffmpegImage')">Executar comandos ffmpeg</button>
 
 
         </div>
 
+        <!---MÉTODOS--->
         <div id="delte-bins" class="tab-content">
             <h1>Remover Binários</h1>
             <p>Este script remove os binários da biblioteca do seu ambiente de desenvolvimento(ffmpeg,arquivos de configurações)</p>
@@ -51,14 +52,6 @@
         remove_ffmpeg.bat</code></pre>
         
         </div>
-        
-        
-
-
-
-
-
-
         <div id="get_url_key_m3u8" class="tab-content">
             <h1>Método:</h1>
             <h2><span class="func">EncryptSuport.get_url_key_m3u8</span><span class="opens">(</span><span class="param">m3u8_content</span>, <span class="param">player</span>, <span class="param">headers</span><span class="opens">)</span></h2>
@@ -103,11 +96,9 @@
             <p><strong>Notas Adicionais:</strong></p>
             <p>Se o IV não estiver disponível no conteúdo M3U8, o valor retornado será <code>None</code> para a chave 'iv'. Além disso, é importante garantir que a URL base fornecida seja a correta para a formação do URL da chave.</p>
         </div>
-        
-
         <div id="downloader_and_remuxer_segments" class="tab-content">
             <h1>Método:</h1>
-            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.downloader_and_remuxer_segments</span><span class="opens">(</span><span class="param">url_playlist</span>, <span class="param">output</span>, <span class="param">key_hex</span>, <span class="param">iv_hex</span>, <span class="param">player</span>, <span class="param">headers</span>, <span class="param">segmentsType</span><span class="opens">)</span></h2>
+            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.downloader_and_remuxer_segments</span><span class="opens">(</span><span class="param">url_playlist</span>, <span class="param">output</span>, <span class="param">key_hex</span>, <span class="param">iv_hex</span>, <span class="param">player</span>, <span class="param">headers</span>, <span class="param">segmentsType</span>,<span class="param">logs</span><span class="opens">)</span></h2>
             <p>Baixa os segmentos de uma playlist M3U8 e os combina em um arquivo de vídeo. O método suporta descriptografia de segmentos se uma chave e IV forem fornecidos.</p>
             
             <p><strong>Parâmetros:</strong></p>
@@ -119,6 +110,7 @@
                 <li><code>player</code> (str, opcional): URL base para os segmentos, se necessário.</li>
                 <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP adicionais para as requisições.</li>
                 <li><code>segmentsType</code> (str, opcional): Tipo de segmentos de saída. Se os segmentos forem do tipo '.m4s','.ts', o método ajusta a extensão dos arquivos temporários.</li>
+                <li><code>logs</code> (bool, opcional): Se True, exibe a saída do processo.</li>
             </ul>
             
             <p><strong>Retorno:</strong></p>
@@ -137,15 +129,9 @@
             <p><strong>Detalhes do Método:</strong></p>
             <p>O método começa verificando se a URL da playlist é válida e, em seguida, faz uma requisição HTTP para obter o conteúdo da playlist. Os segmentos são baixados e salvos como arquivos temporários. Se chaves e IVs forem fornecidos, o método realiza a descriptografia dos segmentos. Após o download, os segmentos são combinados em um arquivo de vídeo usando um método auxiliar. O método também lida com exceções relacionadas a conexões e arquivos, e garante que os arquivos temporários sejam removidos após a conclusão.</p>
         </div>
-
-
-
-
-
-
         <div id="ffmpeg" class="tab-content">
             <h1>Método:</h1>
-            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.ffmpeg</span><span class="opens">(</span><span class="param">input_url</span>, <span class="param">output</span>, <span class="param">type_playlist</span>, <span class="param">resolution</span><span class="opens">)</span></h2>
+            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.ffmpeg_donwloader</span><span class="opens">(</span><span class="param">input_url</span>, <span class="param">output</span>, <span class="param">type_playlist</span>, <span class="param">resolution</span>,<span class="param">logs</span><span class="opens">)</span></h2>
             <p>Baixa um vídeo ou áudio a partir de uma URL M3U8 utilizando o FFmpeg. Dependendo do tipo de playlist, o usuário pode especificar a resolução desejada.</p>
             
             <p><strong>Parâmetros:</strong></p>
@@ -154,6 +140,8 @@
                 <li><code>output</code> (str): Caminho de saída para o vídeo ou áudio final (por exemplo, <code>dir/nome.mp4</code>).</li>
                 <li><code>type_playlist</code> (str): Tipo da playlist ('audio' ou 'video').</li>
                 <li><code>resolution</code> (str, opcional): Resolução desejada para download. Pode ser 'medium', 'lower', ou 'high'. Se não for especificada, 'high' é usada como padrão.</li>
+                <li><code>logs</code> (bool, opcional): Se True, exibe a saída do FFmpeg.</li>
+
             </ul>
             
             <p><strong>Retorno:</strong></p>
@@ -180,9 +168,7 @@
             <pre><code>ffmpeg -y -i http://exemplo.com/playlist.m3u8 -map v:2 -c copy output/video.mp4</code></pre>
 
         </div>
-        
-        
-            <div id="Como_obter_as_urls_de_streams" class="tab-content" style="display:none;">
+        <div id="Como_obter_as_urls_de_streams" class="tab-content" style="display:none;">
                 <h1>Como obter as URLs de streams?</h1>
                 <h2>O que são HLS e M3U8?</h2>
                 <p>
@@ -219,11 +205,6 @@
             
       
             </div>
-            
-
-
-
-
         <div id="install" class="tab-content">
             <h1>Instalação da lib em seu ambiente usando Git</h1>
             <p>Para instalar a biblioteca, use o seguinte comando:</p>
@@ -237,7 +218,6 @@
         
         
         </div>
-
         <div id="get_m3u8" class="tab-content">
             <h1>Método:</h1>
             <h2><span class="func">get_m3u8</span><span class="opens">(</span><span class="param">url_m3u8</span>, <span class="param">headers</span>, <span class="param">save_in_file</span><span class="opens">)</span></h2>
@@ -258,7 +238,6 @@ print(m3u8_content)
 <span class="comment"># Salvando o conteúdo em um arquivo</span>
 <span class="func">get_m3u8</span>(<span class="param">"http://example.com/playlist.m3u8"</span>, <span class="param">save_in_file="playlist.m3u8"</span>)</code></pre>
         </div>
-
         <div id="get_type_m3u8_content" class="tab-content">
             <h1>Método:</h1>
             <h2><span class="func">get_type_m3u8_content</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
@@ -281,7 +260,6 @@ http://example.com/720p.m3u8"""</span>
 tipo = <span class="func">get_type_m3u8_content</span>(m3u8_content)
 print(tipo)  <span class="comment"># Saída: 'Master'</span></code></pre>
         </div>
-
         <div id="get_high_resolution" class="tab-content">
             <h1>Método:</h1>
             <h2><span class="func">get_high_resolution</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
@@ -305,7 +283,6 @@ resolucao, url = <span class="func">get_high_resolution</span>(m3u8_content)
 print(<span class="string">f"Resolução: {resolucao}, URL: {url}"</span>)
 <span class="comment"># Saída: Resolução: 1920x1080, URL: http://example.com/1080p.m3u8</span></code></pre>
         </div>
-
         <div id="get_player_playlist" class="tab-content">
             <h1>Método:</h1>
             <h2><span class="func">get_player_playlist</span><span class="opens">(</span><span class="param">m3u8_url</span><span class="opens">)</span></h2>
@@ -324,7 +301,6 @@ m3u8_url = <span class="string">"http://example.com/streams/1080p.m3u8"</span>
 diretorio_base = <span class="func">get_player_playlist</span>(m3u8_url)
 print(<span class="string">diretorio_base</span>)  <span class="comment"># Saída: http://example.com/streams/</span></code></pre>
         </div>
-
         <div id="get_audio_playlist" class="tab-content">
             <h1>Método:</h1>
             <h2><span class="func">get_audio_playlist</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
@@ -348,16 +324,16 @@ http://example.com/720p.m3u8
 audio_playlist = <span class="func">get_audio_playlist</span>(m3u8_content)
 print(audio_playlist)  <span class="comment"># Saída: http://example.com/audio/playlist.m3u8</span></code></pre>
         </div>
-
         <div id="remuxer_audio_and_video" class="tab-content">
             <h1>Método:</h1>
-            <h2><span class="func">remuxer_audio_and_video</span><span class="opens">(</span><span class="param">videoPath</span>, <span class="param">audio_Path</span>, <span class="param">outputPath</span><span class="opens">)</span></h2>
+            <h2><span class="func">remuxer_audio_and_video</span><span class="opens">(</span><span class="param">videoPath</span>, <span class="param">audio_Path</span>, <span class="param">outputPath</span>,<span class="param">logs</span><span class="opens">)</span></h2>
             <p>Remuxa os arquivos de áudio e vídeo em um único arquivo de saída.</p>
             <p><strong>Parâmetros:</strong></p>
             <ul>
                 <li><code>videoPath</code> (str): Caminho para o arquivo de vídeo.</li>
                 <li><code>audio_Path</code> (str): Caminho para o arquivo de áudio.</li>
                 <li><code>outputPath</code> (str): Caminho de saída para o arquivo remuxado (dir/nome.mp4)</li>
+                <li><code>logs</code> (bool, opcional): Se True, exibe a saída do FFmpeg.</li>
             </ul>
             <p><strong>Retorno:</strong></p>
             <p><code>None</code>: A função salva o arquivo no caminho especificado.</p>
@@ -370,6 +346,40 @@ outputPath = <span class="string">"output.mp4"</span>
 <span class="comment"># Remuxando áudio e vídeo</span>
 <span class="func">remuxer_audio_and_video</span>(video_url, audio_url, output_file)</code></pre>
         </div>
+        <div id="ffmpegImage" class="tab-content">
+    <h1>Método:</h1>
+    <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.ffmpegImage</span><span class="opens">(</span><span class="param">commands</span>, <span class="param">logs</span>,<span class="param">callback</span><span class="opens">)</span></h2>
+    <p>Executa comandos diretamente no FFmpeg. Permite exibir a saída do comando e chama uma função de callback com a saída do comando, se fornecida.</p>
+
+    <p><strong>Parâmetros:</strong></p>
+    <ul>
+        <li><code>commands</code> (list): Lista de comandos que você deseja executar no FFmpeg. Este parâmetro é obrigatório e deve ser uma lista.</li>
+        <li><code>logs</code> (bool, opcional): Se True, exibe a saída do comando FFmpeg no console. O padrão é None, o que significa que a exibição de logs está desativada.</li>
+        <li><code>callback</code> (function, opcional): Função que será chamada para cada linha de saída do FFmpeg. A função deve aceitar uma única string como argumento. Se não for fornecida, nenhum callback será chamado.</li>
+    </ul>
+
+    <p><strong>Retorno:</strong></p>
+    <p><code>None</code>: O método não retorna valor.</p>
+
+    <p><strong>Exemplo:</strong></p>
+    <pre><code><span class="comment"># Definindo uma função de callback</span>
+def process_output(line):
+    <span class="comment"># Processa cada linha de saída</span>
+    print(f"Saída do FFmpeg: {line}")
+
+<span class="comment"># Executando comandos no FFmpeg e exibindo logs</span>
+ffmpegImage([<span class="param">"-i"</span>, <span class="param">"input.mp4"</span>, <span class="param">"-vf"</span>, <span class="param">"scale=1280:720"</span>, <span class="param">"output.mp4"</span>],
+            logs=<span class="param">True</span>,
+            callback=<span class="param">process_output</span>)</code></pre>
+
+
+
+    <p><strong>Comando FFmpeg Gerado:</strong></p>
+    <p>O comando FFmpeg gerado será baseado na lista de comandos fornecida, precedido pelo binário FFmpeg. Por exemplo:</p>
+    <pre><code>ffmpeg -i input.mp4 -vf scale=1280:720 output.mp4</code></pre>
+</div>
+
+
     </div>
     <script src="scripts/script.js"></script>
 </body>

@@ -10,7 +10,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 import subprocess
-from .__config__ import m ,g
+from .__config__ import m, g
+
 m()
 
 data = g()
@@ -19,7 +20,6 @@ data = g()
 FFMPEG_BINARY = data.get('FFMPEG_BINARY')
 INSTALL_DIR = data.get('INSTALL_DIR')  # Valor padrão se não definido
 VERSION = data.get('VERSION')  # Valor padrão se não definido
-
 
 __author__ = 'PauloCesar0073-dev404'
 __version__ = VERSION
@@ -43,10 +43,11 @@ class M3u8Analyzer:
         pass
 
     @staticmethod
-    def get_m3u8(url_m3u8: str, headers: dict = None, save_in_file=None):
+    def get_m3u8(url_m3u8: str, headers: dict = None, save_in_file=None, timeout: int = None):
         """
         Obtém o conteúdo de um arquivo M3U8 a partir de uma URL HLS.
 
+        :param timeout:
         :param url_m3u8: A URL do arquivo M3U8.
         :param headers: Cabeçalhos HTTP opcionais para a requisição.
         :param save_in_file: Se fornecido, salva a playlist em um arquivo .m3u8.
@@ -62,7 +63,10 @@ class M3u8Analyzer:
             if not headers:
                 raise ValueError("Esta URL requer autenticação! Passe os headers autenticados no parâmetro headers")
         try:
-            r = requests.get(url_m3u8, timeout=20, headers=headers, stream=True)
+            time = 20
+            if timeout:
+                time = timeout
+            r = requests.get(url_m3u8, timeout=time, headers=headers, stream=True)
             if r.status_code == 200:
                 if save_in_file:
                     local = os.getcwd()
@@ -279,7 +283,7 @@ class M3u8Analyzer:
 
         @staticmethod
         def __baixar_segmento(url_segmento: str, path: str, index, total, key: bytes = None, iv: bytes = None,
-                              headers: dict = None):
+                              headers: dict = None,logs=None):
             global Novideo, Noaudio
             """
             Baixa um segmento de vídeo e, se necessário, o descriptografa.
@@ -297,7 +301,8 @@ class M3u8Analyzer:
             resposta.raise_for_status()
             total_bytes = 0
             chunk_size = 1024  # Definir o tamanho do chunk (1 KB)
-            print(f"Baixando Segmentos [{index}/{total}]", end=" ")
+            if logs:
+                print(f"Baixando Segmentos [{index}/{total}]", end=" ")
             with open(path, 'wb') as arquivo_segmento:
                 for chunk in resposta.iter_content(chunk_size=chunk_size):
                     if chunk:
@@ -307,23 +312,25 @@ class M3u8Analyzer:
 
             # Descriptografar se necessário
             if key and iv:
-                M3u8Analyzer.M3u8AnalyzerDownloader.__descriptografar_segmento(path, key, iv)
+                M3u8Analyzer.M3u8AnalyzerDownloader.__descriptografar_segmento(path, key, iv,logs)
             # Verificar se o vídeo tem áudio e vídeo
             has_audio = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_audio(path)
             has_video = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_video(path)
             if has_audio:
                 Noaudio = None
             else:
-                print(" NOT audio ")
+                if logs:
+                    print(" NOT audio ")
                 Noaudio = True
             if has_video:
                 Novideo = None
             else:
                 Novideo = True
-                print(" NOT video ")
+                if logs:
+                    print(" NOT video ")
 
         @staticmethod
-        def __descriptografar_segmento(path: str, key: bytes, iv: bytes):
+        def __descriptografar_segmento(path: str, key: bytes, iv: bytes,logs=None):
             """
             Descriptografa um segmento de vídeo se necessário.
 
@@ -449,6 +456,7 @@ class M3u8Analyzer:
                 time.sleep(0.1)
                 return True  # Indica que o índice deve ser incrementado
             return False  # Indica que o índice não deve ser incrementado
+
         @staticmethod
         def __ffmpeg_concatener(output: str, extension: str):
             """
@@ -510,22 +518,22 @@ class M3u8Analyzer:
                 print("Video\t\t\tOK", end="")
 
         @staticmethod
-        def ffmpeg(input_url: str, output: str, type_playlist: str, resolution: str = None):
+        def ffmpeg_donwloader(input_url: str, output: str, type_playlist: str, resolution: str = None, logs=None):
             """
-            Baixa um vídeo usando FFmpeg.
-            :param type_playlist: tipo da playlist 'audio' ,'video'
+            Baixa um vídeo ou áudio usando FFmpeg.
+
+            :param logs: Se True, exibe a saída do FFmpeg.
+            :param type_playlist: Tipo da playlist, pode ser 'audio' ou 'video'.
             :param input_url: URL da playlist m3u8.
-            :param resolution: Define qual resolução você deseja baixar: 'medium', 'lower', 'high'.
-            :param output: Caminho de saída para o vídeo final (dir/nome.mp4).
+            :param resolution: Define a resolução desejada para o vídeo: 'lower', 'medium', 'high'. Ignorado para 'audio'.
+            :param output: Caminho de saída para o arquivo final (dir/nome.mp4 ou dir/nome.mp3).
             :return: None
             """
-            i = 0
-            resolution_map = {}
-            # Mapeando as opções de resolução para filtros de FFmpeg
+            cmd = ''
             if not isinstance(type_playlist, str):
-                raise SyntaxError(f"o parâmetro 'type_playlist' é necessário!")
-            if 'video' not in type_playlist and 'audio' not in type_playlist:
-                raise ValueError("É necessário especificar qual tipo de playlist: 'audio' ou 'video'")
+                raise SyntaxError("O parâmetro 'type_playlist' é necessário!")
+            if type_playlist not in ['audio', 'video']:
+                raise ValueError("É necessário especificar o tipo da playlist: 'audio' ou 'video'")
 
             if type_playlist == 'video':
                 resolution_map = {
@@ -533,53 +541,60 @@ class M3u8Analyzer:
                     'medium': 'v:1',
                     'high': 'v:2'
                 }
-            if type_playlist == 'audio':
+                video_map = resolution_map.get(resolution,
+                                               'v:2')  # 'high' é o padrão se a resolução não for reconhecida
+                cmd = [
+                    f'{ffmpeg_bin}',
+                    '-y',
+                    '-i', input_url,
+                    '-map', video_map,
+                    '-c', 'copy',
+                    output
+                ]
+            elif type_playlist == 'audio':
                 resolution_map = {
                     'lower': 'a:0',
                     'medium': 'a:1',
                     'high': 'a:2'
                 }
-            # Seleciona a opção correta de mapeamento de vídeo
-            if resolution:
-                video_map = resolution_map.get(resolution,
-                                               'v:2')  # 'high' é o padrão se a resolução não for reconhecida
+                audio_map = resolution_map.get(resolution,
+                                               'a:0')  # 'lower' é o padrão se a resolução não for reconhecida
                 cmd = [
-                    fr'{ffmpeg_bin}',
+                    f'{ffmpeg_bin}',
                     '-y',
                     '-i', input_url,
-                    '-map', video_map,
+                    '-map', audio_map,
                     '-c', 'copy',
-                    f'{output}'
-                ]
-            else:
-                cmd = [
-                    fr'{ffmpeg_bin}',
-                    '-y',
-                    '-i', input_url,
-                    '-c', 'copy',
-                    f'{output}'
+                    output
                 ]
 
-            # Executa o comando ffmpeg
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # Configura o startupinfo para ocultar o terminal no Windows
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+            # Executa o comando FFmpeg ocultando o terminal
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       startupinfo=startupinfo)
+
             index = 0
             while True:
-                output = process.stdout.readline()
-                # print(output.decode('utf-8').strip())
-                if process.poll() is not None and output == b'':
+                output_line = process.stdout.readline()
+                if logs:
+                    # Decodificar a saída e remover linhas em branco
+                    clean_output = "\n".join(line for line in output_line.decode('utf-8').splitlines() if line.strip())
+                    if clean_output:
+                        print(clean_output)
+                if process.poll() is not None and output_line == b'':
                     break
-                if output:
-                    if M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output(output, index):
+                if logs is None and output_line:
+                    if M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output(output_line, index):
                         index += 1  # Incrementa o índice apenas se a linha corresponder ao filtro
-            M3u8Analyzer.M3u8AnalyzerDownloader.__clear_line()
-
-            sys.stdout.write('\nProcesso finalizado!\n')
-            sys.stdout.flush()
 
         @staticmethod
-        def remuxer_audio_and_video(audioPath: str, videoPath: str, outputPath: str):
+        def remuxer_audio_and_video(audioPath: str, videoPath: str, outputPath: str,logs=None):
             """
             Remuxer áudio e vídeo com FFmpeg.
+            :param logs: Se True, exibe a saída do FFmpeg.
             :param audioPath: Caminho para o arquivo de áudio.
             :param videoPath: Caminho para o arquivo de vídeo.
             :param outputPath: Caminho de saída para o arquivo remuxado (dir/nome.mp4).
@@ -598,21 +613,63 @@ class M3u8Analyzer:
                 outputPath
             ]
 
-            # Executa o comando ffmpeg
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # Configura o startupinfo para ocultar o terminal no Windows
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+            # Executa o comando FFmpeg ocultando o terminal
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       startupinfo=startupinfo)
 
             # Envia a saída em tempo real para o cliente
             for line in iter(process.stdout.readline, b''):
                 try:
                     # Tente decodificar os bytes como UTF-8
                     decoded_line = line.decode('utf-8').strip()
+                    if logs:
+                        print(decoded_line)
                 except UnicodeDecodeError:
                     # Em caso de erro de decodificação, você pode ignorar a linha ou tratar de outra forma
                     continue
-                print(decoded_line)
                 try:
                     os.remove(audioPath)
                     os.remove(videoPath)
                 except Exception:
                     pass
-            print('Remuxing concluído!')
+        @staticmethod
+        def ffmpegImage(commands: list, logs=None, callback=None):
+            """
+            Executa comandos no FFmpeg livremente
+            :param commands: lista de comandos que você deseja executar no FFmpeg diretamente.
+            :param logs: exibir saída (se True).
+            :param callback: função opcional que será chamada a cada linha de saída (se fornecida).
+            :return: None
+            """
+            if not isinstance(commands, list):
+                raise TypeError("O parâmetro 'commands' deve ser uma lista.")
+
+            # Adiciona o binário FFmpeg no início da lista de comandos
+            cmd = [ffmpeg_bin] + commands
+            # Configura o startupinfo para ocultar o terminal no Windows
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+            # Executa o comando FFmpeg ocultando o terminal
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                                       startupinfo=startupinfo)
+
+            while True:
+                output_line = process.stdout.readline()
+                if output_line == '' and process.poll() is not None:
+                    break
+
+                if logs:
+                    # Exibir a saída e remover linhas em branco
+                    clean_output = "\n".join(
+                        line for line in output_line.splitlines() if line.strip())
+                    if clean_output:
+                        print(clean_output)
+
+                if callback and output_line:
+                    # Chama o callback com a linha de saída
+                    callback(output_line.strip())

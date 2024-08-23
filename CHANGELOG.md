@@ -1,4 +1,4 @@
-![Versão](https://img.shields.io/badge/version-1.0.2.3-orange)
+![Versão](https://img.shields.io/badge/version-1.0.2.4-orange)
 
 -
 ---
@@ -15,4 +15,6 @@
 ---
 ![Novas Funcionalidades](https://img.shields.io/badge/status-novas_funcionalidades-blue)
 
+- parâmetro `logs` , em processos
+- método `ffmpeg_Image` permite executar comandos no ffmpeg
 - 
