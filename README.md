@@ -1,10 +1,13 @@
 <div align="center">
   <h1><img src="logo.ico"></h1>
+
+![Versão](https://img.shields.io/badge/version-1.0.2-orange)
+![Licença](https://img.shields.io/badge/license-MIT-orange)![Estrelas](https://img.shields.io/github/stars/PauloCesar-dev404/M3u8_Analyzer?style=social)
+![Downloads](https://img.shields.io/pypi/dm/m3u8-analyzer)
+
+
 </div>
 
-<p align="center">
-  <code>version: 1.0.1</code> | <code>author: PauloCesar-dev404</code> | <code>LICENSE: MIT</code>
-</p>
 
 
 

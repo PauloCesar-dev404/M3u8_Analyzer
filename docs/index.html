@@ -12,6 +12,7 @@
         <h1>M3u8_Analyzer</h1>
         <a href="https://github.com/PauloCesar-dev404/M3u8_Analyzer" target="_top">
         <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub Logo" style="width: 20px; height: 20px; margin-right: 8px;"><h3 style="color: rgb(94, 94, 94);">PauloCesar-dev404/M3u8_Analyzer</h3></a>
+      
     </header>
     
     <div class="content">
@@ -24,9 +25,138 @@
             <button class="tab-button" onclick="openTab(event, 'get_player_playlist')">Obter Player</button>
             <button class="tab-button" onclick="openTab(event, 'get_audio_playlist')">Obter URL de Playlist de Áudio</button>
             <button class="tab-button" onclick="openTab(event, 'remuxer_audio_and_video')">Remuxar Áudio e Vídeo</button>
-                <button class="tab-button" onclick="openTab(event, 'Como_obter_as_urls_de_streams')">Como obter as URLs de streams?</button>
-            </div>
+            <button class="tab-button" onclick="openTab(event, 'Como_obter_as_urls_de_streams')">Como obter as URLs de streams?</button>
+            <button class="tab-button" onclick="openTab(event, 'get_url_key_m3u8')">Obter chave de criptografia AES-128 e o IV de um conteúdo M3U8</button>            
+            <button class="tab-button" onclick="openTab(event, 'downloader_and_remuxer_segments')">Baixar uma playlist M3U8 segmentos por segmentos(suporte a descriptografia)</button>
+            <button class="tab-button" onclick="openTab(event, 'ffmpeg')">usar ffmpeg para baixar uma Playlist M3U8</button>
+
+
+
+        </div>
+
+        <div id="get_url_key_m3u8" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">EncryptSuport.get_url_key_m3u8</span><span class="opens">(</span><span class="param">m3u8_content</span>, <span class="param">player</span>, <span class="param">headers</span><span class="opens">)</span></h2>
+            <p>Extrai a URL da chave de criptografia AES-128 e o IV de um conteúdo M3U8.</p>
             
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>m3u8_content</code> (str): String contendo o conteúdo do arquivo M3U8.</li>
+                <li><code>player</code> (str): URL base para formar o URL completo da chave, se necessário.</li>
+                <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP opcionais para a requisição da chave.</li>
+            </ul>
+            
+            <p><strong>Retorno:</strong></p>
+            <p><code>dict</code>: Um dicionário contendo a chave em hexadecimal e o IV (se disponível). A chave é retornada com a chave 'key', e o IV com a chave 'iv'.</p>
+            
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
+        m3u8_content = """
+        #EXTM3U
+        #EXT-X-VERSION:3
+        #EXT-X-TARGETDURATION:10
+        #EXT-X-MEDIA-SEQUENCE:0
+        #EXTINF:10.0,
+        http://example.com/segment0.ts
+        #EXTINF:10.0,
+        http://example.com/segment1.ts
+        #EXT-X-KEY:METHOD=AES-128,URI="http://example.com/key.key",IV=0x1234567890ABCDEF
+        #EXTINF:10.0,
+        http://example.com/segment2.ts
+        """
+        
+        <span class="comment"># Obtendo a chave e o IV</span>
+        result = <span class="func">EncryptSuport.get_url_key_m3u8</span>(<span class="param">m3u8_content</span>, 
+                                                                           <span class="param">"http://example.com"</span>, 
+                                                                           <span class="param">headers=<span class="dict">{"User-Agent": "my_agent"}</span></span>)
+        print(result)  <span class="comment"># Saída: {'key': 'aabbccddeeff00112233445566778899', 'iv': '1234567890abcdef'}</span></code></pre>
+            
+            <p><strong>Detalhes do Método:</strong></p>
+            <p>O método utiliza uma expressão regular para encontrar a URL da chave e o IV dentro do conteúdo M3U8. A URL da chave é formada combinando a URL base do player com a URL extraída do conteúdo M3U8. O método então faz uma requisição HTTP para obter o conteúdo da chave, converte-o para hexadecimal, e retorna um dicionário contendo a chave e o IV.</p>
+            
+            
+            <p><strong>Notas Adicionais:</strong></p>
+            <p>Se o IV não estiver disponível no conteúdo M3U8, o valor retornado será <code>None</code> para a chave 'iv'. Além disso, é importante garantir que a URL base fornecida seja a correta para a formação do URL da chave.</p>
+        </div>
+        
+
+        <div id="downloader_and_remuxer_segments" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.downloader_and_remuxer_segments</span><span class="opens">(</span><span class="param">url_playlist</span>, <span class="param">output</span>, <span class="param">key_hex</span>, <span class="param">iv_hex</span>, <span class="param">player</span>, <span class="param">headers</span>, <span class="param">segmentsType</span><span class="opens">)</span></h2>
+            <p>Baixa os segmentos de uma playlist M3U8 e os combina em um arquivo de vídeo. O método suporta descriptografia de segmentos se uma chave e IV forem fornecidos.</p>
+            
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>url_playlist</code> (str): URL da playlist de segmentos M3U8.</li>
+                <li><code>output</code> (str): Caminho de saída para o vídeo final (por exemplo, <code>dir/nome.mp4</code>).</li>
+                <li><code>key_hex</code> (str, opcional): Chave de descriptografia em formato hexadecimal.</li>
+                <li><code>iv_hex</code> (str, opcional): IV (vetor de inicialização) em formato hexadecimal.</li>
+                <li><code>player</code> (str, opcional): URL base para os segmentos, se necessário.</li>
+                <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP adicionais para as requisições.</li>
+                <li><code>segmentsType</code> (str, opcional): Tipo de segmentos de saída. Se os segmentos forem do tipo '.m4s','.ts', o método ajusta a extensão dos arquivos temporários.</li>
+            </ul>
+            
+            <p><strong>Retorno:</strong></p>
+            <p><code>None</code>: O método não retorna valor, mas realiza o download e combinação dos segmentos em um único arquivo de vídeo.</p>
+            
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Baixando e remuxando segmentos</span>
+        downloader_and_remuxer_segments(<span class="param">"http://example.com/playlist.m3u8"</span>, 
+                                        <span class="param">"output/video.mp4"</span>, 
+                                        <span class="param">key_hex=<span class="string">"your_key_hex"</span></span>, 
+                                        <span class="param">iv_hex=<span class="string">"your_iv_hex"</span></span>, 
+                                        <span class="param">player=<span class="string">"http://example.com/base_url"</span></span>, 
+                                        <span class="param">headers=<span class="dict">{"User-Agent": "your_agent"}</span></span>, 
+                                        <span class="param">segmentsType=<span class="string">".m4s"</span></span>)</code></pre>
+            
+            <p><strong>Detalhes do Método:</strong></p>
+            <p>O método começa verificando se a URL da playlist é válida e, em seguida, faz uma requisição HTTP para obter o conteúdo da playlist. Os segmentos são baixados e salvos como arquivos temporários. Se chaves e IVs forem fornecidos, o método realiza a descriptografia dos segmentos. Após o download, os segmentos são combinados em um arquivo de vídeo usando um método auxiliar. O método também lida com exceções relacionadas a conexões e arquivos, e garante que os arquivos temporários sejam removidos após a conclusão.</p>
+        </div>
+
+
+
+
+
+
+        <div id="ffmpeg" class="tab-content">
+            <h1>Método:</h1>
+            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.ffmpeg</span><span class="opens">(</span><span class="param">input_url</span>, <span class="param">output</span>, <span class="param">type_playlist</span>, <span class="param">resolution</span><span class="opens">)</span></h2>
+            <p>Baixa um vídeo ou áudio a partir de uma URL M3U8 utilizando o FFmpeg. Dependendo do tipo de playlist, o usuário pode especificar a resolução desejada.</p>
+            
+            <p><strong>Parâmetros:</strong></p>
+            <ul>
+                <li><code>input_url</code> (str): URL da playlist M3U8.</li>
+                <li><code>output</code> (str): Caminho de saída para o vídeo ou áudio final (por exemplo, <code>dir/nome.mp4</code>).</li>
+                <li><code>type_playlist</code> (str): Tipo da playlist ('audio' ou 'video').</li>
+                <li><code>resolution</code> (str, opcional): Resolução desejada para download. Pode ser 'medium', 'lower', ou 'high'. Se não for especificada, 'high' é usada como padrão.</li>
+            </ul>
+            
+            <p><strong>Retorno:</strong></p>
+            <p><code>None</code>: O método não retorna valor, mas realiza o download do vídeo ou áudio especificado.</p>
+        
+            <p><strong>Exemplo:</strong></p>
+            <pre><code><span class="comment"># Baixando um vídeo em alta resolução</span>
+        ffmpeg(<span class="param">"http://exemplo.com/playlist.m3u8"</span>, <span class="param">"output/video.mp4"</span>, <span class="param">"video"</span>, <span class="param">"high"</span>)
+        
+        <span class="comment"># Baixando áudio com resolução padrão</span>
+        ffmpeg(<span class="param">"http://exemplo.com/playlist.m3u8"</span>, <span class="param">"output/audio.mp3"</span>, <span class="param">"audio"</span>)</code></pre>
+            
+            <p><strong>Detalhes do Método:</strong></p>
+            <p>O método verifica o sistema operacional e seleciona a versão correta do FFmpeg (seja 'ffmpeg' ou 'ffmpeg.exe'). Ele mapeia a resolução desejada para os filtros de FFmpeg e constrói o comando para executar o download. O processo é gerenciado utilizando a biblioteca <code>subprocess</code> para executar o comando FFmpeg e monitorar a saída.</p>
+            
+            <p><strong>Exceções Levantadas:</strong></p>
+            <ul>
+                <li><code>SyntaxError</code>: Se o parâmetro <code>type_playlist</code> não for uma string.</li>
+                <li><code>ValueError</code>: Se o tipo de playlist especificado não for 'audio' ou 'video'.</li>
+            </ul>
+            
+            <p><strong>Comando FFmpeg Gerado:</strong></p>
+            <p>Dependendo dos parâmetros fornecidos, o comando FFmpeg gerado será semelhante a:</p>
+            <pre><code>ffmpeg -y -i http://exemplo.com/playlist.m3u8 -map v:2 -c copy output/video.mp4</code></pre>
+
+        </div>
+        
+        
             <div id="Como_obter_as_urls_de_streams" class="tab-content" style="display:none;">
                 <h1>Como obter as URLs de streams?</h1>
                 <h2>O que são HLS e M3U8?</h2>
@@ -196,21 +326,21 @@ print(audio_playlist)  <span class="comment"># Saída: http://example.com/audio/
 
         <div id="remuxer_audio_and_video" class="tab-content">
             <h1>Método:</h1>
-            <h2><span class="func">remuxer_audio_and_video</span><span class="opens">(</span><span class="param">video_url</span>, <span class="param">audio_url</span>, <span class="param">output_file</span><span class="opens">)</span></h2>
+            <h2><span class="func">remuxer_audio_and_video</span><span class="opens">(</span><span class="param">videoPath</span>, <span class="param">audio_Path</span>, <span class="param">outputPath</span><span class="opens">)</span></h2>
             <p>Remuxa os arquivos de áudio e vídeo em um único arquivo de saída.</p>
             <p><strong>Parâmetros:</strong></p>
             <ul>
-                <li><code>video_url</code> (str): URL do arquivo de vídeo.</li>
-                <li><code>audio_url</code> (str): URL do arquivo de áudio.</li>
-                <li><code>output_file</code> (str): Caminho para o arquivo de saída.</li>
+                <li><code>videoPath</code> (str): Caminho para o arquivo de vídeo.</li>
+                <li><code>audio_Path</code> (str): Caminho para o arquivo de áudio.</li>
+                <li><code>outputPath</code> (str): Caminho de saída para o arquivo remuxado (dir/nome.mp4)</li>
             </ul>
             <p><strong>Retorno:</strong></p>
             <p><code>None</code>: A função salva o arquivo no caminho especificado.</p>
             <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># URLs dos arquivos de vídeo e áudio</span>
-video_url = <span class="string">"http://example.com/video.mp4"</span>
-audio_url = <span class="string">"http://example.com/audio.mp3"</span>
-output_file = <span class="string">"output.mp4"</span>
+            <pre><code><span class="comment"># Paths dos arquivos de vídeo e áudio</span>
+videoPath = <span class="string">"video.mp4"</span>
+audio_Path = <span class="string">"audio.mp3"</span>
+outputPath = <span class="string">"output.mp4"</span>
 
 <span class="comment"># Remuxando áudio e vídeo</span>
 <span class="func">remuxer_audio_and_video</span>(video_url, audio_url, output_file)</code></pre>
