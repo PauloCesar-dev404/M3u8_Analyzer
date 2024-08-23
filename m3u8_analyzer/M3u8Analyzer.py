@@ -1,26 +1,36 @@
+import os
 import re
 import shutil
+import sys
 import time
 import uuid
-import cryptography.exceptions
+import requests
+from colorama import Fore, Style
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 import subprocess
-import os
-import sys
-import requests
-from .__constants import INSTALL_DIR, FFMPEG_BINARY
+from .__config__ import m ,g
+m()
+
+data = g()
+
+# Definições das variáveis
+FFMPEG_BINARY = data.get('FFMPEG_BINARY')
+INSTALL_DIR = data.get('INSTALL_DIR')  # Valor padrão se não definido
+VERSION = data.get('VERSION')  # Valor padrão se não definido
+
 
 __author__ = 'PauloCesar0073-dev404'
-__version__ = '1.0.2.1.1'
+__version__ = VERSION
 __ossystem = os.name
-HOME = INSTALL_DIR
-ffmpeg_bin = os.path.join(INSTALL_DIR, FFMPEG_BINARY)
 
+# Configuração do diretório de instalação e binário do ffmpeg
+HOME = INSTALL_DIR
+ffmpeg_bin = fr'{INSTALL_DIR}\{FFMPEG_BINARY}'
+
+# Diretório temporário
 temp_dir = '.TEMPs'
-if not os.path.exists(temp_dir):
-    os.makedirs(temp_dir, exist_ok=True)
 
 
 class M3u8Analyzer:
@@ -270,7 +280,7 @@ class M3u8Analyzer:
         @staticmethod
         def __baixar_segmento(url_segmento: str, path: str, index, total, key: bytes = None, iv: bytes = None,
                               headers: dict = None):
-            global Novideo,Noaudio
+            global Novideo, Noaudio
             """
             Baixa um segmento de vídeo e, se necessário, o descriptografa.
             Em seguida, verifica se o vídeo possui áudio.
@@ -323,20 +333,36 @@ class M3u8Analyzer:
             :return: None
             """
             try:
+                # Abre o arquivo e lê os bytes do segmento
                 with open(path, 'rb') as arquivo_segmento:
                     segmento_bytes = arquivo_segmento.read()
 
+                # Configura o backend e o cipher
                 backend = default_backend()
                 cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
                 decryptor = cipher.decryptor()
                 unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+
+                # Descriptografa o segmento
                 decrypted_segment = decryptor.update(segmento_bytes) + decryptor.finalize()
                 segment = unpadder.update(decrypted_segment) + unpadder.finalize()
 
+                # Escreve o segmento descriptografado de volta ao arquivo
                 with open(path, 'wb') as arquivo_segmento:
                     arquivo_segmento.write(segment)
+
+            except FileNotFoundError as e:
+                # Erro ao abrir ou localizar o arquivo
+                raise FileNotFoundError(f"Erro: Arquivo não encontrado - {e}\n")
+            except IOError as e:
+                # Erro de I/O durante leitura ou escrita
+                raise IOError(f"Erro de I/O ao acessar o arquivo - {e}\n")
+            except ValueError as e:
+                # Erro relacionado ao valor fornecido (por exemplo, chave ou IV incorretos)
+                raise ValueError(f"Erro de valor - {e}\n")
             except Exception as e:
-                raise ValueError(f"erro ao descriptografar {e}")
+                # Captura qualquer outro erro inesperado
+                raise SyntaxError(f"Erro inesperado: {e}\n")
 
         @staticmethod
         def __verificar_audio(path: str) -> bool:
@@ -417,13 +443,12 @@ class M3u8Analyzer:
             # Verifica se a linha contém a palavra 'Opening'
             if re.search(r'Opening', lines):
                 M3u8Analyzer.M3u8AnalyzerDownloader.__clear_line()  # Limpa a linha anterior
-                sys.stdout.write(f'Obtendo segmentos [{index}]')
+                message = f'\rO {Fore.LIGHTBLUE_EX}ffmpeg{Style.RESET_ALL} está obtendo o segmento {Fore.LIGHTRED_EX}[nº{index}]{Style.RESET_ALL}'
+                sys.stdout.write(message)
                 sys.stdout.flush()
-                time.sleep(0.2)
+                time.sleep(0.1)
                 return True  # Indica que o índice deve ser incrementado
-
             return False  # Indica que o índice não deve ser incrementado
-
         @staticmethod
         def __ffmpeg_concatener(output: str, extension: str):
             """
@@ -494,16 +519,14 @@ class M3u8Analyzer:
             :param output: Caminho de saída para o vídeo final (dir/nome.mp4).
             :return: None
             """
-
             i = 0
-
-            ffmpeg_exe = 'ffmpeg' if os.name == 'posix' else 'ffmpeg.exe'
             resolution_map = {}
             # Mapeando as opções de resolução para filtros de FFmpeg
             if not isinstance(type_playlist, str):
                 raise SyntaxError(f"o parâmetro 'type_playlist' é necessário!")
-            if not 'videos' or not 'audio' in type_playlist:
-                raise ValueError(" e necessário especificar qual tipo de playlis, 'audio','video'")
+            if 'video' not in type_playlist and 'audio' not in type_playlist:
+                raise ValueError("É necessário especificar qual tipo de playlist: 'audio' ou 'video'")
+
             if type_playlist == 'video':
                 resolution_map = {
                     'lower': 'v:0',
@@ -593,4 +616,3 @@ class M3u8Analyzer:
                 except Exception:
                     pass
             print('Remuxing concluído!')
-
