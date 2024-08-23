@@ -1,5 +1,4 @@
 import platform
-import stat
 import time
 import requests
 import zipfile
@@ -10,6 +9,8 @@ from http.client import IncompleteRead
 
 from colorama import Fore, Style
 
+v = '1.0.2.3'
+
 
 class Configurate:
     def __init__(self):
@@ -18,7 +19,7 @@ class Configurate:
         self.BIN_DIR = 'ffmpeg-binaries'
         self.config = self.load_config(self.config_file_path)
         self.OS_SYSTEM = self.config.get('OS_SYSTEM', os.name)
-        self.VERSION = self.config.get('VERSION', '1.0.2.1.5')
+        self.VERSION = self.config.get('VERSION', v)
         self.FFMPEG_URL = self.config.get('FFMPEG_URL')
         self.FFMPEG_BINARY = self.config.get('FFMPEG_BINARY')
         self.INSTALL_DIR = self.config.get('INSTALL_DIR')
@@ -128,9 +129,12 @@ class Configurate:
         try:
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(extract_to)
+
         except zipfile.BadZipFile as e:
             sys.stderr.write(f"Erro ao descompactar o arquivo: {e}\n")
             raise
+        finally:
+            os.remove(zip_path)
 
     # Função para remover o arquivo
     def remove_file(self, file_path: str):
@@ -160,6 +164,7 @@ class Configurate:
         self.extract_zip(zip_path, self.INSTALL_DIR)
         # Remover o arquivo ZIP
         self.remove_file(zip_path)
+
     # Função para desinstalar os binários
     def uninstall_bins(self):
         """Remove os binários do ffmpeg instalados no ambiente virtual com força bruta."""
@@ -308,3 +313,8 @@ def g():
     configurate = Configurate()
     load = configurate.loader()
     return load
+
+
+## verificar se ta sendo exutado
+if __name__ == '__main__':
+    raise RuntimeError("erro de execução!")
