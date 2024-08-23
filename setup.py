@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 # Lê o conteúdo do README.md
-with open('READMELIB.md', 'r', encoding='utf-8') as file:
+with open('README.md', 'r', encoding='utf-8') as file:
     long_description = file.read()
 
 setup(
