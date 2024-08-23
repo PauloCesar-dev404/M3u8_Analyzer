@@ -24,7 +24,51 @@
             <button class="tab-button" onclick="openTab(event, 'get_player_playlist')">Obter Player</button>
             <button class="tab-button" onclick="openTab(event, 'get_audio_playlist')">Obter URL de Playlist de Áudio</button>
             <button class="tab-button" onclick="openTab(event, 'remuxer_audio_and_video')">Remuxar Áudio e Vídeo</button>
-        </div>
+
+                <button class="tab-button" onclick="openTab(event, 'Como_obter_as_urls_de_streams')">Como obter as URLs de streams?</button>
+            </div>
+            
+            <div id="Como_obter_as_urls_de_streams" class="tab-content" style="display:none;">
+                <h1>Como obter as URLs de streams?</h1>
+                <h2>O que são HLS e M3U8?</h2>
+                <p>
+                    <strong>HLS (HTTP Live Streaming):</strong> HLS é um protocolo de streaming de mídia desenvolvido pela Apple. 
+                    Ele divide o conteúdo de mídia em pequenos segmentos, que são transmitidos pela internet e reproduzidos em sequência. 
+                    O HLS é amplamente utilizado para a transmissão de vídeo ao vivo e sob demanda, sendo compatível com uma variedade de dispositivos, 
+                    incluindo smartphones, tablets e computadores.
+                </p>
+                <p>
+                    <strong>M3U8:</strong> O M3U8 é um arquivo de playlist utilizado pelo HLS. 
+                    Ele contém uma lista de URLs que apontam para os segmentos de mídia, geralmente em formato <code>.ts</code> (Transport Stream). 
+                    O arquivo M3U8 é essencialmente um arquivo de texto que pode ser lido por players de mídia compatíveis com HLS.
+                </p>
+                
+                <h2>Como obter as URLs de streams?</h2>
+                <p>Existem diversas maneiras de capturar as URLs de streams HLS (arquivos <code>.m3u8</code>). Abaixo, listei uma das melhores para tráfegos m3u8:</p>
+            
+                <h3>1. Inspecionando a Rede no Navegador</h3>
+                <ul>
+                    <li>Abra o site que transmite o conteúdo de vídeo.</li>
+                    <li>Pressione <code>F12</code> para abrir as ferramentas de desenvolvedor do seu navegador.</li>
+                    <li>Vá para a aba <strong>Rede</strong> ou <strong>Network</strong>.</li>
+                    <li>Recarregue a página e observe as solicitações de rede feitas pelo navegador.</li>
+                    <li>Procure por um arquivo <code>.m3u8</code>. Geralmente, ele aparece como uma solicitação de tipo <code>text/plain</code> ou <code>application/vnd.apple.mpegurl</code>.</li>
+                    <li>Clique com o botão direito na URL do arquivo <code>.m3u8</code> e copie-a.</li>
+                </ul>
+            
+                <h3>2. Usando Extensões de Navegador</h3>
+                <ul>
+                    <li>Existem extensões específicas para navegadores, como o Chrome e Firefox, que facilitam a captura de URLs HLS. Extensões como <strong><a href="https://github.com/PauloCesar-dev404/M3u8Analyzer-Extension-">M3u8Analyzer</a></strong></li>
+                    <li>Após instalar a extensão, acesse o site cujo tem o vídeo que deseja capturar.</li>
+                    <li>A extensão identificará automaticamente as URLs das streams HLS e permitirá que você as copie.</li>
+                </ul>
+            
+      
+            </div>
+            
+
+
+
 
         <div id="install" class="tab-content">
             <h1>Instalação da lib em seu ambiente usando Git</h1>
