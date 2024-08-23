@@ -13,7 +13,7 @@ import requests
 from .__constants import INSTALL_DIR, FFMPEG_BINARY
 
 __author__ = 'PauloCesar0073-dev404'
-__version__ = '1.0.2'
+__version__ = '1.0.2.1.1'
 __ossystem = os.name
 HOME = INSTALL_DIR
 ffmpeg_bin = os.path.join(INSTALL_DIR, FFMPEG_BINARY)
