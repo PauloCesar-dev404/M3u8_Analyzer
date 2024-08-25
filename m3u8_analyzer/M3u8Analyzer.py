@@ -11,14 +11,27 @@ from colorama import Fore, Style
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from .__config__ import m, g
+from .__config__ import g, Configurate
 
-m()
 data = g()
 # Definições das variáveis
-FFMPEG_BINARY = data.get('FFMPEG_BINARY')
+STATUS = data.get('STATUS')
+if not STATUS == 'TRUE':
+    raise Warning("Arquivo de configuração inválido...")
 INSTALL_DIR = data.get('INSTALL_DIR')  # Valor padrão se não definido
-VERSION = data.get('VERSION')  # Valor padrão se não definido
+if not INSTALL_DIR:
+    g()
+
+FFMPEG_BINARY = data.get('FFMPEG_BINARY')
+if FFMPEG_BINARY:
+    path = os.path.join(INSTALL_DIR, FFMPEG_BINARY)
+    if os.path.exists(path):
+        g()
+    else:
+        g()
+VERSION = data.get('VERSION')
+if not VERSION:
+    g()
 __author__ = 'PauloCesar0073-dev404'
 __version__ = VERSION
 __ossystem = os.name

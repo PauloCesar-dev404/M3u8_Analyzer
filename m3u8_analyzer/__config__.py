@@ -1,4 +1,5 @@
 import platform
+import re
 import time
 import requests
 import zipfile
@@ -9,7 +10,7 @@ from http.client import IncompleteRead
 
 from colorama import Fore, Style
 
-v = '1.0.2.5'
+v = '1.0.2.9'
 
 
 class Configurate:
@@ -23,6 +24,7 @@ class Configurate:
         self.FFMPEG_URL = self.config.get('FFMPEG_URL')
         self.FFMPEG_BINARY = self.config.get('FFMPEG_BINARY')
         self.INSTALL_DIR = self.config.get('INSTALL_DIR')
+        self.STATUS = self.config.get('STATUS')
         self.VENV_PATH = self.config.get('VENV_PATH', os.path.dirname(self.config_file_path))
 
         if not self.INSTALL_DIR:
@@ -56,22 +58,29 @@ class Configurate:
             for key, value in config.items():
                 f.write(f"{key}={value}\n")
 
+    def check_files(self, path):
+        """Verifica"""
+        binary_path = os.path.join(self.VENV_PATH)
+        if binary_path:
+            return True
+        return None
+
     # Função para obter entradas do usuário e atualizar o arquivo de configuração
     def configure(self):
-
         config = {
             'OS_SYSTEM': os.name,
             'VERSION': self.VERSION
         }
-
         if os.name == 'nt':
             config[
-                'FFMPEG_URL'] = 'https://raw.githubusercontent.com/PauloCesar-dev404/binarios/main/ffmpeg2024-07-15-git-350146a1ea-essentials_build.zip'
+                'FFMPEG_URL'] = ('https://raw.githubusercontent.com/PauloCesar-dev404/binarios/main/ffmpeg2024-07-15'
+                                 '-git-350146a1ea-essentials_build.zip')
             config['FFMPEG_BINARY'] = 'ffmpeg.exe'
         elif os.name == 'posix':
             config[
-                'FFMPEG_URL'] = 'https://raw.githubusercontent.com/PauloCesar-dev404/binarios/main/ffmpeg_6.1.1_3UBUNTU5.zip'
+                'FFMPEG_URL'] = 'https://raw.githubusercontent.com/PauloCesar-dev404/binarios/main/ffmpeg_linux.zip'
             config['FFMPEG_BINARY'] = 'ffmpeg'
+        config['STATUS'] = 'TRUE'
         config['VENV_PATH'] = os.path.dirname(self.config_file_path)
         config['INSTALL_DIR'] = self.INSTALL_DIR
         self.save_config(self.config_file_path, config)
@@ -193,6 +202,7 @@ class Configurate:
             self.configure()
             ffmpeg_binary_path = os.path.join(self.INSTALL_DIR, self.FFMPEG_BINARY)
             if not os.path.exists(ffmpeg_binary_path):
+                self.configure()
                 self.install_bins()
             else:
                 self.configure()
@@ -202,47 +212,73 @@ class Configurate:
             self.configure()
         except Exception as e:
             raise DeprecationWarning(
-                f"este erro deve ser contatado ao desenvolvedor!juntamnet com 'nome do ambiente virtual e qual o "
+                f"este erro deve ser contatado ao desenvolvedor!juntamente com 'nome do ambiente virtual e qual o "
                 f"tipo' , ' seu sistema' e 'versão do python' '{e}'")
 
     def create_file(self):
         """Cria o arquivo de desinstalação apropriado com base no sistema operacional."""
         base_path = self.VENV_PATH
-
         # Determina o sistema operacional
         os_name = platform.system()
+        # Define o padrão de regex
+        pattern = re.compile(r"m3u8_analyzer-[\d.]+\.dist-info")
+        # Caminho do diretório onde você quer procurar
+        directory_path = fr"{base_path}\Lib\site-packages"
+        # Lista para armazenar os diretórios correspondentes
+        matching_dirs = ''
+        # Percorre todos os itens no diretório
+        for item in os.listdir(directory_path):
+            # Verifica se o item é um diretório e se corresponde ao padrão
+            if os.path.isdir(os.path.join(directory_path, item)) and pattern.match(item):
+                matching_dirs = item
 
         if os_name == "Windows":
             # Cria o conteúdo do script .bat para Windows
-            bat_content = fr"""
-    @echo off
-    chcp 65001 >nul
-    SET "INSTALL_DIR={base_path}\ffmpeg-binaries"
-    SET "FILE={base_path}\.m3u8_analyzer_config"
+            bat_content = fr"""@echo off
+chcp 65001 >nul
+SET "LIB_DIR={base_path}\Lib\site-packages\m3u8_analyzer"
+SET "LIB_DIR2={base_path}\Lib\site-packages\{matching_dirs}"
+SET "INSTALL_DIR={base_path}\ffmpeg-binaries"
+SET "FILE={base_path}\.m3u8_analyzer_config"
 
-    IF EXIST "%INSTALL_DIR%" (
-        RMDIR /S /Q "%INSTALL_DIR%"
-        ECHO ffmpeg desinstalado com sucesso!
-    )
+:: Remover o diretório de instalação do ffmpeg
+IF EXIST "%INSTALL_DIR%" (
+    RMDIR /S /Q "%INSTALL_DIR%" 2>nul
+)
 
-    IF EXIST "%FILE%" (
-        DEL "%FILE%"
-        ECHO Arquivo de configuração removido com sucesso!
-    )
+:: Remover o arquivo de configuração
+IF EXIST "%FILE%" (
+    DEL /Q "%FILE%" 2>nul
+)
 
-    :: Cria e executa um script temporário para apagar este script
-    SET "TEMP_SCRIPT=%TEMP%\remove_self.bat"
-    (
-        ECHO @echo off
-        ECHO DEL "%~f0"
-        ECHO EXIT
-    ) > "%TEMP_SCRIPT%"
-    CALL "%TEMP_SCRIPT%"
-    DEL "%TEMP_SCRIPT%"
-            """
+:: Remover o diretório LIB_DIR
+IF EXIST "%LIB_DIR%" (
+    RMDIR /S /Q "%LIB_DIR%" 2>nul
+)
+
+:: Remover o diretório LIB_DIR2
+IF EXIST "%LIB_DIR2%" (
+    RMDIR /S /Q "%LIB_DIR2%" 2>nul
+)
+
+:: Criar um script temporário para remover o próprio script
+SET "TEMP_SCRIPT=%TEMP%\remove_self.bat"
+(
+    ECHO @echo off
+    ECHO :loop
+    ECHO DEL "%~f0" ^>nul 2^>^&1
+    ECHO IF EXIST "%~f0" GOTO loop
+    ECHO DEL "%TEMP_SCRIPT%" ^>nul 2^>^&1
+    ECHO EXIT /b 0
+) > "%TEMP_SCRIPT%" 2>nul
+
+:: Executa o script temporário sem esperar
+START "" /B "%TEMP_SCRIPT%" 2>nul
+EXIT
+"""
 
             # Caminho para salvar o script .bat
-            bat_file_path = os.path.join(base_path, 'Scripts', 'remove_ffmpeg.bat')
+            bat_file_path = os.path.join(base_path, 'Scripts', 'm3u8_analyzer_uninstall.bat')
 
             try:
                 # Verifica se o diretório Scripts existe e cria se não existir
@@ -259,29 +295,43 @@ class Configurate:
 
         elif os_name == "Linux":
             # Cria o conteúdo do script .sh para Linux
-            sh_content = f"""#!/bin/bash
-    INSTALL_DIR="{base_path}/ffmpeg-binaries"
-    FILE="{base_path}/.m3u8_analyzer_config"
+            sh_content = fr"""#!/bin/bash
 
-    if [ -d "$INSTALL_DIR" ]; then
-        rm -rf "$INSTALL_DIR"
-        echo "ffmpeg desinstalado com sucesso!"
-    fi
+# Definir as variáveis
+INSTALL_DIR="${base_path}/ffmpeg-binaries"
+FILE="${base_path}/.m3u8_analyzer_config"
+LIB_DIR="${base_path}/Lib/site-packages/m3u8_analyzer"
+LIB_DIR2="${base_path}/Lib/site-packages/${matching_dirs}"
 
-    if [ -f "$FILE" ]; then
-        rm "$FILE"
-        echo "Arquivo de configuração removido com sucesso!"
-    fi
+# Remover o diretório de instalação do ffmpeg
+if [ -d "$INSTALL_DIR" ]; then
+    rm -rf "$INSTALL_DIR" 2>/dev/null
+fi
 
-    # Remove o próprio script
-    SELF="$0"
-    if [ -f "$SELF" ]; then
-        rm "$SELF"
-    fi
-            """
+# Remover o arquivo de configuração
+if [ -f "$FILE" ]; then
+    rm "$FILE" 2>/dev/null
+fi
+
+# Remover o diretório LIB_DIR
+if [ -d "$LIB_DIR" ]; then
+    rm -rf "$LIB_DIR" 2>/dev/null
+fi
+
+# Remover o diretório LIB_DIR2
+if [ -d "$LIB_DIR2" ]; then
+    rm -rf "$LIB_DIR2" 2>/dev/null
+fi
+
+# Remover o próprio script
+SELF="$0"
+if [ -f "$SELF" ]; then
+    rm "$SELF" 2>/dev/null
+fi
+"""
 
             # Caminho para salvar o script .sh
-            sh_file_path = os.path.join(base_path, 'Scripts', 'remove_ffmpeg.sh')
+            sh_file_path = os.path.join(base_path, 'Scripts', 'm3u8_analyzer_uninstall.sh')
 
             try:
                 # Verifica se o diretório Scripts existe e cria se não existir
@@ -303,13 +353,9 @@ class Configurate:
             print("Sistema operacional não suportado. Nenhum script criado.")
 
 
-# Função principal para executar a configuração e instalação
-def m():
+def g():
     configurate = Configurate()
     configurate.run()
-
-
-def g():
     configurate = Configurate()
     load = configurate.loader()
     return load

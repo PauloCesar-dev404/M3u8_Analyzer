@@ -1,20 +1,17 @@
-![Versão](https://img.shields.io/badge/version-1.0.2.5-orange)
+![Versão](https://img.shields.io/badge/version-1.0.2.9-orange)
 
 -
 ---
 ![Correção](https://img.shields.io/badge/status-correção-brightgreen)
 
-- [x] logs 
+- [x] image-ffmpeg erros de configuração
 ---
 ### ![Bugs](https://img.shields.io/badge/status-bugs-red)
 - Para reportar bugs, [clique aqui](https://github.com/PauloCesar-dev404/M3u8_Analyzer/issues).
 ---
 ### ![Melhorias](https://img.shields.io/badge/status-melhorias-yellow)
-- Melhorias na documentação para facilitar o entendimento da configuração da biblioteca.
-- Otimização do código para melhor desempenho na inicialização.
+- em seu ambiente(terminal) basta digitar `m3u8_analyzer_uninstall` para desinstalar a lib
 ---
 ![Novas Funcionalidades](https://img.shields.io/badge/status-novas_funcionalidades-blue)
 
-- parâmetro `logs` , em processos
-- método `ffmpeg_Image` permite executar comandos no ffmpeg
 - 
