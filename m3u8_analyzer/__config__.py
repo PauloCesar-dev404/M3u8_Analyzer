@@ -10,7 +10,7 @@ from http.client import IncompleteRead
 
 from colorama import Fore, Style
 
-v = '1.0.2.9'
+v = '1.0.3.2'
 
 
 class Configurate:
@@ -215,78 +215,70 @@ class Configurate:
                 f"este erro deve ser contatado ao desenvolvedor!juntamente com 'nome do ambiente virtual e qual o "
                 f"tipo' , ' seu sistema' e 'versão do python' '{e}'")
 
+    def __get_pip_path(self,venv_path):
+        pyvenv_cfg_path = os.path.join(venv_path, 'pyvenv.cfg')
+        if not os.path.isfile(pyvenv_cfg_path):
+            raise FileNotFoundError(f"{pyvenv_cfg_path} não encontrado")
+        with open(pyvenv_cfg_path, 'r') as file:
+            lines = file.readlines()
+        for line in lines:
+            if line.startswith('home'):
+                home_path = line.split('=')[1].strip()
+                pip_path = os.path.join(home_path, 'Scripts',
+                                        'pip.exe') if platform.system() == "Windows" else os.path.join(home_path, 'bin',
+                                                                                                       'pip')
+                return pip_path
+
+        raise ValueError("Não foi possível encontrar o caminho do pip no arquivo pyvenv.cfg")
+
     def create_file(self):
         """Cria o arquivo de desinstalação apropriado com base no sistema operacional."""
         base_path = self.VENV_PATH
-        # Determina o sistema operacional
+        pip_path = self.__get_pip_path(base_path)
         os_name = platform.system()
-        # Define o padrão de regex
-        pattern = re.compile(r"m3u8_analyzer-[\d.]+\.dist-info")
-        # Caminho do diretório onde você quer procurar
-        directory_path = fr"{base_path}\Lib\site-packages"
-        # Lista para armazenar os diretórios correspondentes
-        matching_dirs = ''
-        # Percorre todos os itens no diretório
-        for item in os.listdir(directory_path):
-            # Verifica se o item é um diretório e se corresponde ao padrão
-            if os.path.isdir(os.path.join(directory_path, item)) and pattern.match(item):
-                matching_dirs = item
 
         if os_name == "Windows":
-            # Cria o conteúdo do script .bat para Windows
             bat_content = fr"""@echo off
-chcp 65001 >nul
-SET "LIB_DIR={base_path}\Lib\site-packages\m3u8_analyzer"
-SET "LIB_DIR2={base_path}\Lib\site-packages\{matching_dirs}"
-SET "INSTALL_DIR={base_path}\ffmpeg-binaries"
-SET "FILE={base_path}\.m3u8_analyzer_config"
+    chcp 65001 >nul
+    SET "INSTALL_DIR={base_path}\\ffmpeg-binaries"
+    SET "FILE={base_path}\\.m3u8_analyzer_config"
 
-:: Remover o diretório de instalação do ffmpeg
-IF EXIST "%INSTALL_DIR%" (
-    RMDIR /S /Q "%INSTALL_DIR%" 2>nul
-)
+    :: Remover o diretório de instalação do ffmpeg
+    IF EXIST "%INSTALL_DIR%" (
+        RMDIR /S /Q "%INSTALL_DIR%" 2>nul
+    )
 
-:: Remover o arquivo de configuração
-IF EXIST "%FILE%" (
-    DEL /Q "%FILE%" 2>nul
-)
+    :: Remover o arquivo de configuração
+    IF EXIST "%FILE%" (
+        DEL /Q "%FILE%" 2>nul
+    )
 
-:: Remover o diretório LIB_DIR
-IF EXIST "%LIB_DIR%" (
-    RMDIR /S /Q "%LIB_DIR%" 2>nul
-)
+    :: Executar o comando pip uninstall m3u8-analyzer no ambiente virtual
+    "{pip_path}" uninstall m3u8-analyzer
 
-:: Remover o diretório LIB_DIR2
-IF EXIST "%LIB_DIR2%" (
-    RMDIR /S /Q "%LIB_DIR2%" 2>nul
-)
+    :: Criar um script temporário para remover o próprio script
+    SET "TEMP_SCRIPT=%TEMP%\\remove_self.bat"
+    (
+        ECHO @echo off
+        ECHO :loop
+        ECHO DEL "%~f0" ^>nul 2^>^&1
+        ECHO IF EXIST "%~f0" GOTO loop
+        ECHO DEL "%TEMP_SCRIPT%" ^>nul 2^>^&1
+        ECHO EXIT /b 0
+    ) > "%TEMP_SCRIPT%" 2>nul
 
-:: Criar um script temporário para remover o próprio script
-SET "TEMP_SCRIPT=%TEMP%\remove_self.bat"
-(
-    ECHO @echo off
-    ECHO :loop
-    ECHO DEL "%~f0" ^>nul 2^>^&1
-    ECHO IF EXIST "%~f0" GOTO loop
-    ECHO DEL "%TEMP_SCRIPT%" ^>nul 2^>^&1
-    ECHO EXIT /b 0
-) > "%TEMP_SCRIPT%" 2>nul
+    :: Executa o script temporário sem esperar
+    START "" /B "%TEMP_SCRIPT%" 2>nul
+    EXIT
+    """
 
-:: Executa o script temporário sem esperar
-START "" /B "%TEMP_SCRIPT%" 2>nul
-EXIT
-"""
-
-            # Caminho para salvar o script .bat
             bat_file_path = os.path.join(base_path, 'Scripts', 'm3u8_analyzer_uninstall.bat')
 
             try:
-                # Verifica se o diretório Scripts existe e cria se não existir
                 bat_dir_path = os.path.dirname(bat_file_path)
                 if not os.path.exists(bat_dir_path):
                     os.makedirs(bat_dir_path)
 
-                # Escreve o conteúdo no arquivo .bat
                 with open(bat_file_path, 'w', encoding='utf-8') as bat_file:
                     bat_file.write(bat_content)
 
@@ -294,56 +286,42 @@ EXIT
                 print(f"Erro ao criar o script de remoção do ffmpeg: {e}")
 
         elif os_name == "Linux":
-            # Cria o conteúdo do script .sh para Linux
             sh_content = fr"""#!/bin/bash
 
-# Definir as variáveis
-INSTALL_DIR="${base_path}/ffmpeg-binaries"
-FILE="${base_path}/.m3u8_analyzer_config"
-LIB_DIR="${base_path}/Lib/site-packages/m3u8_analyzer"
-LIB_DIR2="${base_path}/Lib/site-packages/${matching_dirs}"
+    # Definir as variáveis
+    INSTALL_DIR="{base_path}/ffmpeg-binaries"
+    FILE="{base_path}/.m3u8_analyzer_config"
+    # Remover o diretório de instalação do ffmpeg
+    if [ -d "$INSTALL_DIR" ]; then
+        rm -rf "$INSTALL_DIR" 2>/dev/null
+    fi
 
-# Remover o diretório de instalação do ffmpeg
-if [ -d "$INSTALL_DIR" ]; then
-    rm -rf "$INSTALL_DIR" 2>/dev/null
-fi
+    # Remover o arquivo de configuração
+    if [ -f "$FILE" ]; then
+        rm "$FILE" 2>/dev/null
+    fi
 
-# Remover o arquivo de configuração
-if [ -f "$FILE" ]; then
-    rm "$FILE" 2>/dev/null
-fi
 
-# Remover o diretório LIB_DIR
-if [ -d "$LIB_DIR" ]; then
-    rm -rf "$LIB_DIR" 2>/dev/null
-fi
+    # Executar o comando pip uninstall m3u8-analyzer no ambiente virtual
+    "{pip_path}" uninstall m3u8-analyzer
 
-# Remover o diretório LIB_DIR2
-if [ -d "$LIB_DIR2" ]; then
-    rm -rf "$LIB_DIR2" 2>/dev/null
-fi
+    # Remover o próprio script
+    SELF="$0"
+    if [ -f "$SELF" ]; then
+        rm "$SELF" 2>/dev/null
+    fi
+    """
 
-# Remover o próprio script
-SELF="$0"
-if [ -f "$SELF" ]; then
-    rm "$SELF" 2>/dev/null
-fi
-"""
-
-            # Caminho para salvar o script .sh
-            sh_file_path = os.path.join(base_path, 'Scripts', 'm3u8_analyzer_uninstall.sh')
+            sh_file_path = os.path.join(base_path, 'bin', 'm3u8_analyzer_uninstall.sh')
 
             try:
-                # Verifica se o diretório Scripts existe e cria se não existir
                 sh_dir_path = os.path.dirname(sh_file_path)
                 if not os.path.exists(sh_dir_path):
                     os.makedirs(sh_dir_path)
 
-                # Escreve o conteúdo no arquivo .sh
                 with open(sh_file_path, 'w', encoding='utf-8') as sh_file:
                     sh_file.write(sh_content)
 
-                # Torna o script .sh executável
                 os.chmod(sh_file_path, 0o755)
 
             except Exception as e:

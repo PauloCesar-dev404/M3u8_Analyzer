@@ -1,7 +1,7 @@
 <div align="center">
   <h1>m3u8-analyzer</h1>
 
-![Versão](https://img.shields.io/badge/version-1.0.2.9-orange)
+![Versão](https://img.shields.io/badge/version-1.0.3.2-orange)
 ![Licença](https://img.shields.io/badge/license-MIT-orange)![Estrelas](https://img.shields.io/github/stars/PauloCesar-dev404/M3u8_Analyzer?style=social)
 ![Downloads](https://img.shields.io/pypi/dm/m3u8-analyzer)
 [![Sponsor](https://img.shields.io/badge/💲Donate-yellow)](https://apoia.se/paulocesar-dev404)

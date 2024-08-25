@@ -1,4 +1,4 @@
-![Versão](https://img.shields.io/badge/version-1.0.2.9-orange)
+![Versão](https://img.shields.io/badge/version-1.0.3.2-orange)
 
 -
 ---
