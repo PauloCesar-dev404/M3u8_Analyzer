@@ -1,10 +1,10 @@
-![Versão](https://img.shields.io/badge/version-1.0.2.4-orange)
+![Versão](https://img.shields.io/badge/version-1.0.2.5-orange)
 
 -
 ---
 ![Correção](https://img.shields.io/badge/status-correção-brightgreen)
 
-- 
+- [x] logs 
 ---
 ### ![Bugs](https://img.shields.io/badge/status-bugs-red)
 - Para reportar bugs, [clique aqui](https://github.com/PauloCesar-dev404/M3u8_Analyzer/issues).

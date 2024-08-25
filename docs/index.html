@@ -1,390 +1,923 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M3u8_Analyzer</title>
-    <link rel="stylesheet" href="stylesheets/style.css">
-    <link rel="shortcut icon" href="assets/logo.ico" type="image/x-icon">
-</head>
-<body>
-    <header class="logo">
-        <h1>M3u8_Analyzer</h1>
-        <a href="https://github.com/PauloCesar-dev404/M3u8_Analyzer" target="_top">
-        <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub Logo" style="width: 20px; height: 20px; margin-right: 8px;"><h3 style="color: rgb(94, 94, 94);">PauloCesar-dev404/M3u8_Analyzer</h3></a>
-      
-    </header>
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
     
-    <div class="content">
-        <!-- Menu com os métodos da biblioteca -->
-        <div class="tabs">
-            <button class="tab-button" onclick="openTab(event, 'install')">Instalação</button>
-            <button class="tab-button" onclick="openTab(event, 'get_m3u8')">Obter Conteúdo de uma URL M3U8</button>
-            <button class="tab-button" onclick="openTab(event, 'get_type_m3u8_content')">Obter o Tipo da Playlist</button>
-            <button class="tab-button" onclick="openTab(event, 'get_high_resolution')">Obter Melhor Resolução</button>
-            <button class="tab-button" onclick="openTab(event, 'get_player_playlist')">Obter Player</button>
-            <button class="tab-button" onclick="openTab(event, 'get_audio_playlist')">Obter URL de Playlist de Áudio</button>
-            <button class="tab-button" onclick="openTab(event, 'remuxer_audio_and_video')">Remuxar Áudio e Vídeo</button>
-            <button class="tab-button" onclick="openTab(event, 'Como_obter_as_urls_de_streams')">Como obter as URLs de streams?</button>
-            <button class="tab-button" onclick="openTab(event, 'get_url_key_m3u8')">Obter chave de criptografia AES-128 e o IV de um conteúdo M3U8</button>            
-            <button class="tab-button" onclick="openTab(event, 'downloader_and_remuxer_segments')">Baixar uma playlist M3U8 segmentos por segmentos(suporte a descriptografia)</button>
-            <button class="tab-button" onclick="openTab(event, 'ffmpeg')">usar ffmpeg para baixar uma Playlist M3U8</button>
-            <button class="tab-button" onclick="openTab(event, 'delte-bins')">Como Apagar os binários da lib do meu ambiente?</button>
-            <button class="tab-button" onclick="openTab(event, 'ffmpegImage')">Executar comandos ffmpeg</button>
-
-
-        </div>
-
-        <!---MÉTODOS--->
-        <div id="delte-bins" class="tab-content">
-            <h1>Remover Binários</h1>
-            <p>Este script remove os binários da biblioteca do seu ambiente de desenvolvimento(ffmpeg,arquivos de configurações)</p>
-            
-            <p><strong>Como Usar:</strong></p>
-            <p>Execute o script apropriado para o seu sistema operacional com o seu ambiente virtual ativado onde a biblioteca está instalada.</p>
-            
-            <p><strong>Para Linux:</strong></p>
-            <pre><code><span class="comment"># No terminal com seu ambiente virtual ativado</span>
-        remove_ffmpeg.sh</code></pre>
-            
-            <p><strong>Para Windows:</strong></p>
-            <pre><code><span class="comment"># No prompt de comando com seu ambiente virtual ativado</span>
-        remove_ffmpeg.bat</code></pre>
-        
-        </div>
-        <div id="get_url_key_m3u8" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">EncryptSuport.get_url_key_m3u8</span><span class="opens">(</span><span class="param">m3u8_content</span>, <span class="param">player</span>, <span class="param">headers</span><span class="opens">)</span></h2>
-            <p>Extrai a URL da chave de criptografia AES-128 e o IV de um conteúdo M3U8.</p>
-            
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>m3u8_content</code> (str): String contendo o conteúdo do arquivo M3U8.</li>
-                <li><code>player</code> (str): URL base para formar o URL completo da chave, se necessário.</li>
-                <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP opcionais para a requisição da chave.</li>
-            </ul>
-            
-            <p><strong>Retorno:</strong></p>
-            <p><code>dict</code>: Um dicionário contendo a chave em hexadecimal e o IV (se disponível). A chave é retornada com a chave 'key', e o IV com a chave 'iv'.</p>
-            
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
-        m3u8_content = """
-        #EXTM3U
-        #EXT-X-VERSION:3
-        #EXT-X-TARGETDURATION:10
-        #EXT-X-MEDIA-SEQUENCE:0
-        #EXTINF:10.0,
-        http://example.com/segment0.ts
-        #EXTINF:10.0,
-        http://example.com/segment1.ts
-        #EXT-X-KEY:METHOD=AES-128,URI="http://example.com/key.key",IV=0x1234567890ABCDEF
-        #EXTINF:10.0,
-        http://example.com/segment2.ts
-        """
-        
-        <span class="comment"># Obtendo a chave e o IV</span>
-        result = <span class="func">EncryptSuport.get_url_key_m3u8</span>(<span class="param">m3u8_content</span>, 
-                                                                           <span class="param">"http://example.com"</span>, 
-                                                                           <span class="param">headers=<span class="dict">{"User-Agent": "my_agent"}</span></span>)
-        print(result)  <span class="comment"># Saída: {'key': 'aabbccddeeff00112233445566778899', 'iv': '1234567890abcdef'}</span></code></pre>
-            
-            <p><strong>Detalhes do Método:</strong></p>
-            <p>O método utiliza uma expressão regular para encontrar a URL da chave e o IV dentro do conteúdo M3U8. A URL da chave é formada combinando a URL base do player com a URL extraída do conteúdo M3U8. O método então faz uma requisição HTTP para obter o conteúdo da chave, converte-o para hexadecimal, e retorna um dicionário contendo a chave e o IV.</p>
-            
-            
-            <p><strong>Notas Adicionais:</strong></p>
-            <p>Se o IV não estiver disponível no conteúdo M3U8, o valor retornado será <code>None</code> para a chave 'iv'. Além disso, é importante garantir que a URL base fornecida seja a correta para a formação do URL da chave.</p>
-        </div>
-        <div id="downloader_and_remuxer_segments" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.downloader_and_remuxer_segments</span><span class="opens">(</span><span class="param">url_playlist</span>, <span class="param">output</span>, <span class="param">key_hex</span>, <span class="param">iv_hex</span>, <span class="param">player</span>, <span class="param">headers</span>, <span class="param">segmentsType</span>,<span class="param">logs</span><span class="opens">)</span></h2>
-            <p>Baixa os segmentos de uma playlist M3U8 e os combina em um arquivo de vídeo. O método suporta descriptografia de segmentos se uma chave e IV forem fornecidos.</p>
-            
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>url_playlist</code> (str): URL da playlist de segmentos M3U8.</li>
-                <li><code>output</code> (str): Caminho de saída para o vídeo final (por exemplo, <code>dir/nome.mp4</code>).</li>
-                <li><code>key_hex</code> (str, opcional): Chave de descriptografia em formato hexadecimal.</li>
-                <li><code>iv_hex</code> (str, opcional): IV (vetor de inicialização) em formato hexadecimal.</li>
-                <li><code>player</code> (str, opcional): URL base para os segmentos, se necessário.</li>
-                <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP adicionais para as requisições.</li>
-                <li><code>segmentsType</code> (str, opcional): Tipo de segmentos de saída. Se os segmentos forem do tipo '.m4s','.ts', o método ajusta a extensão dos arquivos temporários.</li>
-                <li><code>logs</code> (bool, opcional): Se True, exibe a saída do processo.</li>
-            </ul>
-            
-            <p><strong>Retorno:</strong></p>
-            <p><code>None</code>: O método não retorna valor, mas realiza o download e combinação dos segmentos em um único arquivo de vídeo.</p>
-            
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Baixando e remuxando segmentos</span>
-        downloader_and_remuxer_segments(<span class="param">"http://example.com/playlist.m3u8"</span>, 
-                                        <span class="param">"output/video.mp4"</span>, 
-                                        <span class="param">key_hex=<span class="string">"your_key_hex"</span></span>, 
-                                        <span class="param">iv_hex=<span class="string">"your_iv_hex"</span></span>, 
-                                        <span class="param">player=<span class="string">"http://example.com/base_url"</span></span>, 
-                                        <span class="param">headers=<span class="dict">{"User-Agent": "your_agent"}</span></span>, 
-                                        <span class="param">segmentsType=<span class="string">".m4s"</span></span>)</code></pre>
-            
-            <p><strong>Detalhes do Método:</strong></p>
-            <p>O método começa verificando se a URL da playlist é válida e, em seguida, faz uma requisição HTTP para obter o conteúdo da playlist. Os segmentos são baixados e salvos como arquivos temporários. Se chaves e IVs forem fornecidos, o método realiza a descriptografia dos segmentos. Após o download, os segmentos são combinados em um arquivo de vídeo usando um método auxiliar. O método também lida com exceções relacionadas a conexões e arquivos, e garante que os arquivos temporários sejam removidos após a conclusão.</p>
-        </div>
-        <div id="ffmpeg" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.ffmpeg_donwloader</span><span class="opens">(</span><span class="param">input_url</span>, <span class="param">output</span>, <span class="param">type_playlist</span>, <span class="param">resolution</span>,<span class="param">logs</span><span class="opens">)</span></h2>
-            <p>Baixa um vídeo ou áudio a partir de uma URL M3U8 utilizando o FFmpeg. Dependendo do tipo de playlist, o usuário pode especificar a resolução desejada.</p>
-            
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>input_url</code> (str): URL da playlist M3U8.</li>
-                <li><code>output</code> (str): Caminho de saída para o vídeo ou áudio final (por exemplo, <code>dir/nome.mp4</code>).</li>
-                <li><code>type_playlist</code> (str): Tipo da playlist ('audio' ou 'video').</li>
-                <li><code>resolution</code> (str, opcional): Resolução desejada para download. Pode ser 'medium', 'lower', ou 'high'. Se não for especificada, 'high' é usada como padrão.</li>
-                <li><code>logs</code> (bool, opcional): Se True, exibe a saída do FFmpeg.</li>
-
-            </ul>
-            
-            <p><strong>Retorno:</strong></p>
-            <p><code>None</code>: O método não retorna valor, mas realiza o download do vídeo ou áudio especificado.</p>
-        
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Baixando um vídeo em alta resolução</span>
-        ffmpeg(<span class="param">"http://exemplo.com/playlist.m3u8"</span>, <span class="param">"output/video.mp4"</span>, <span class="param">"video"</span>, <span class="param">"high"</span>)
-        
-        <span class="comment"># Baixando áudio com resolução padrão</span>
-        ffmpeg(<span class="param">"http://exemplo.com/playlist.m3u8"</span>, <span class="param">"output/audio.mp3"</span>, <span class="param">"audio"</span>)</code></pre>
-            
-            <p><strong>Detalhes do Método:</strong></p>
-            <p>O método verifica o sistema operacional e seleciona a versão correta do FFmpeg (seja 'ffmpeg' ou 'ffmpeg.exe'). Ele mapeia a resolução desejada para os filtros de FFmpeg e constrói o comando para executar o download. O processo é gerenciado utilizando a biblioteca <code>subprocess</code> para executar o comando FFmpeg e monitorar a saída.</p>
-            
-            <p><strong>Exceções Levantadas:</strong></p>
-            <ul>
-                <li><code>SyntaxError</code>: Se o parâmetro <code>type_playlist</code> não for uma string.</li>
-                <li><code>ValueError</code>: Se o tipo de playlist especificado não for 'audio' ou 'video'.</li>
-            </ul>
-            
-            <p><strong>Comando FFmpeg Gerado:</strong></p>
-            <p>Dependendo dos parâmetros fornecidos, o comando FFmpeg gerado será semelhante a:</p>
-            <pre><code>ffmpeg -y -i http://exemplo.com/playlist.m3u8 -map v:2 -c copy output/video.mp4</code></pre>
-
-        </div>
-        <div id="Como_obter_as_urls_de_streams" class="tab-content" style="display:none;">
-                <h1>Como obter as URLs de streams?</h1>
-                <h2>O que são HLS e M3U8?</h2>
-                <p>
-                    <strong>HLS (HTTP Live Streaming):</strong> HLS é um protocolo de streaming de mídia desenvolvido pela Apple. 
-                    Ele divide o conteúdo de mídia em pequenos segmentos, que são transmitidos pela internet e reproduzidos em sequência. 
-                    O HLS é amplamente utilizado para a transmissão de vídeo ao vivo e sob demanda, sendo compatível com uma variedade de dispositivos, 
-                    incluindo smartphones, tablets e computadores.
-                </p>
-                <p>
-                    <strong>M3U8:</strong> O M3U8 é um arquivo de playlist utilizado pelo HLS. 
-                    Ele contém uma lista de URLs que apontam para os segmentos de mídia, geralmente em formato <code>.ts</code> (Transport Stream). 
-                    O arquivo M3U8 é essencialmente um arquivo de texto que pode ser lido por players de mídia compatíveis com HLS.
-                </p>
-                
-                <h2>Como obter as URLs de streams?</h2>
-                <p>Existem diversas maneiras de capturar as URLs de streams HLS (arquivos <code>.m3u8</code>). Abaixo, listei uma das melhores para tráfegos m3u8:</p>
-            
-                <h3>1. Inspecionando a Rede no Navegador</h3>
-                <ul>
-                    <li>Abra o site que transmite o conteúdo de vídeo.</li>
-                    <li>Pressione <code>F12</code> para abrir as ferramentas de desenvolvedor do seu navegador.</li>
-                    <li>Vá para a aba <strong>Rede</strong> ou <strong>Network</strong>.</li>
-                    <li>Recarregue a página e observe as solicitações de rede feitas pelo navegador.</li>
-                    <li>Procure por um arquivo <code>.m3u8</code>. Geralmente, ele aparece como uma solicitação de tipo <code>text/plain</code> ou <code>application/vnd.apple.mpegurl</code>.</li>
-                    <li>Clique com o botão direito na URL do arquivo <code>.m3u8</code> e copie-a.</li>
-                </ul>
-            
-                <h3>2. Usando Extensões de Navegador</h3>
-                <ul>
-                    <li>Existem extensões específicas para navegadores, como o Chrome e Firefox, que facilitam a captura de URLs HLS. Extensões como <strong><a href="https://github.com/PauloCesar-dev404/M3u8Analyzer-Extension-">M3u8Analyzer</a></strong></li>
-                    <li>Após instalar a extensão, acesse o site cujo tem o vídeo que deseja capturar.</li>
-                    <li>A extensão identificará automaticamente as URLs das streams HLS e permitirá que você as copie.</li>
-                </ul>
-            
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
       
-            </div>
-        <div id="install" class="tab-content">
-            <h1>Instalação da lib em seu ambiente usando Git</h1>
-            <p>Para instalar a biblioteca, use o seguinte comando:</p>
-            <pre><code><span class="func">pip</span> <span class="opens">install</span> <span class="string">gi+https://github.com/PauloCesar-dev404/M3u8Analyzer</span></code></pre>
+      
+      
+      
+      
+        <link rel="next" href="api/">
+      
+      
+      <link rel="icon" href="assets/logo_noturno.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.33">
+    
+    
+      
+        <title>m3u8-analyzer</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.3cba04c6.min.css">
+      
         
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
 
-            <h1>Instalação da lib em seu ambiente usando pypi</h1>
-            <p>Para instalar a biblioteca, use o seguinte comando:</p>
-            <pre><code><span class="func">pip</span> <span class="opens">install</span> <span class="string">m3u8-analyzer</span></code></pre>
+
+    
+    
+      
+    
+    
+      
         
         
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
         
-        </div>
-        <div id="get_m3u8" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">get_m3u8</span><span class="opens">(</span><span class="param">url_m3u8</span>, <span class="param">headers</span>, <span class="param">save_in_file</span><span class="opens">)</span></h2>
-            <p>Obtém o conteúdo de um arquivo M3U8 a partir de uma URL HLS. Lembre-se de que deve ser uma URL válida .m3u8.</p>
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>url_m3u8</code> (str): A URL do arquivo M3U8.</li>
-                <li><code>headers</code> (dict, opcional): Cabeçalhos HTTP a serem enviados com a solicitação.</li>
-                <li><code>save_in_file</code> (str, opcional): O caminho para salvar o conteúdo M3U8 em um arquivo.</li>
-            </ul>
-            <p><strong>Retorno:</strong></p>
-            <p><code>str</code>: O conteúdo do arquivo M3U8 como string.</p>
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Obtendo o conteúdo do M3U8</span>
-m3u8_content = <span class="func">get_m3u8</span>(<span class="param">"http://example.com/playlist.m3u8"</span>)
-print(m3u8_content)
-
-<span class="comment"># Salvando o conteúdo em um arquivo</span>
-<span class="func">get_m3u8</span>(<span class="param">"http://example.com/playlist.m3u8"</span>, <span class="param">save_in_file="playlist.m3u8"</span>)</code></pre>
-        </div>
-        <div id="get_type_m3u8_content" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">get_type_m3u8_content</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
-            <p>Determina o tipo de conteúdo de um arquivo M3U8.</p>
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>m3u8_content</code> (str): O conteúdo do arquivo M3U8.</li>
-            </ul>
-            <p><strong>Retorno:</strong></p>
-            <p><code>str</code>: O tipo de conteúdo identificado.</p>
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
-m3u8_content = <span class="string">"""#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
-http://example.com/1080p.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720
-http://example.com/720p.m3u8"""</span>
-
-<span class="comment"># Determinando o tipo de conteúdo</span>
-tipo = <span class="func">get_type_m3u8_content</span>(m3u8_content)
-print(tipo)  <span class="comment"># Saída: 'Master'</span></code></pre>
-        </div>
-        <div id="get_high_resolution" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">get_high_resolution</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
-            <p>Obtém a maior resolução disponível em um arquivo M3U8 e o URL correspondente.</p>
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>m3u8_content</code> (str): O conteúdo do arquivo M3U8.</li>
-            </ul>
-            <p><strong>Retorno:</strong></p>
-            <p><code>Tuple[str, str]</code>: Uma tupla com a maior resolução e o URL correspondente.</p>
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
-m3u8_content = <span class="string">"""#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
-http://example.com/1080p.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720
-http://example.com/720p.m3u8"""</span>
-
-<span class="comment"># Obtendo a maior resolução</span>
-resolucao, url = <span class="func">get_high_resolution</span>(m3u8_content)
-print(<span class="string">f"Resolução: {resolucao}, URL: {url}"</span>)
-<span class="comment"># Saída: Resolução: 1920x1080, URL: http://example.com/1080p.m3u8</span></code></pre>
-        </div>
-        <div id="get_player_playlist" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">get_player_playlist</span><span class="opens">(</span><span class="param">m3u8_url</span><span class="opens">)</span></h2>
-            <p>Obtém o caminho do diretório base do arquivo M3U8.</p>
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>m3u8_url</code> (str): A URL completa do arquivo M3U8.</li>
-            </ul>
-            <p><strong>Retorno:</strong></p>
-            <p><code>str</code>: O caminho do diretório base.</p>
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="func"># URL do M3U8</span>
-m3u8_url = <span class="string">"http://example.com/streams/1080p.m3u8"</span>
-
-<span class="comment"># Obtendo o caminho do diretório base</span>
-diretorio_base = <span class="func">get_player_playlist</span>(m3u8_url)
-print(<span class="string">diretorio_base</span>)  <span class="comment"># Saída: http://example.com/streams/</span></code></pre>
-        </div>
-        <div id="get_audio_playlist" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">get_audio_playlist</span><span class="opens">(</span><span class="param">m3u8_content</span><span class="opens">)</span></h2>
-            <p>Extrai o URL da playlist de áudio do conteúdo M3U8.</p>
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>m3u8_content</code> (str): O conteúdo do arquivo M3U8.</li>
-            </ul>
-            <p><strong>Retorno:</strong></p>
-            <p><code>str</code>: A URL da playlist de áudio.</p>
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Exemplo de conteúdo M3U8</span>
-m3u8_content = <span class="string">"""#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080
-http://example.com/1080p.m3u8
-#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720
-http://example.com/720p.m3u8
-#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="English",DEFAULT=YES,AUTOSELECT=YES,LANGUAGE="eng",URI="http://example.com/audio/playlist.m3u8"""</span>
-
-<span class="comment"># Obtendo o URL da playlist de áudio</span>
-audio_playlist = <span class="func">get_audio_playlist</span>(m3u8_content)
-print(audio_playlist)  <span class="comment"># Saída: http://example.com/audio/playlist.m3u8</span></code></pre>
-        </div>
-        <div id="remuxer_audio_and_video" class="tab-content">
-            <h1>Método:</h1>
-            <h2><span class="func">remuxer_audio_and_video</span><span class="opens">(</span><span class="param">videoPath</span>, <span class="param">audio_Path</span>, <span class="param">outputPath</span>,<span class="param">logs</span><span class="opens">)</span></h2>
-            <p>Remuxa os arquivos de áudio e vídeo em um único arquivo de saída.</p>
-            <p><strong>Parâmetros:</strong></p>
-            <ul>
-                <li><code>videoPath</code> (str): Caminho para o arquivo de vídeo.</li>
-                <li><code>audio_Path</code> (str): Caminho para o arquivo de áudio.</li>
-                <li><code>outputPath</code> (str): Caminho de saída para o arquivo remuxado (dir/nome.mp4)</li>
-                <li><code>logs</code> (bool, opcional): Se True, exibe a saída do FFmpeg.</li>
-            </ul>
-            <p><strong>Retorno:</strong></p>
-            <p><code>None</code>: A função salva o arquivo no caminho especificado.</p>
-            <p><strong>Exemplo:</strong></p>
-            <pre><code><span class="comment"># Paths dos arquivos de vídeo e áudio</span>
-videoPath = <span class="string">"video.mp4"</span>
-audio_Path = <span class="string">"audio.mp3"</span>
-outputPath = <span class="string">"output.mp4"</span>
-
-<span class="comment"># Remuxando áudio e vídeo</span>
-<span class="func">remuxer_audio_and_video</span>(video_url, audio_url, output_file)</code></pre>
-        </div>
-        <div id="ffmpegImage" class="tab-content">
-    <h1>Método:</h1>
-    <h2><span class="func">M3u8Analyzer.M3u8AnalyzerDownloader.ffmpegImage</span><span class="opens">(</span><span class="param">commands</span>, <span class="param">logs</span>,<span class="param">callback</span><span class="opens">)</span></h2>
-    <p>Executa comandos diretamente no FFmpeg. Permite exibir a saída do comando e chama uma função de callback com a saída do comando, se fornecida.</p>
-
-    <p><strong>Parâmetros:</strong></p>
-    <ul>
-        <li><code>commands</code> (list): Lista de comandos que você deseja executar no FFmpeg. Este parâmetro é obrigatório e deve ser uma lista.</li>
-        <li><code>logs</code> (bool, opcional): Se True, exibe a saída do comando FFmpeg no console. O padrão é None, o que significa que a exibição de logs está desativada.</li>
-        <li><code>callback</code> (function, opcional): Função que será chamada para cada linha de saída do FFmpeg. A função deve aceitar uma única string como argumento. Se não for fornecida, nenhum callback será chamado.</li>
-    </ul>
-
-    <p><strong>Retorno:</strong></p>
-    <p><code>None</code>: O método não retorna valor.</p>
-
-    <p><strong>Exemplo:</strong></p>
-    <pre><code><span class="comment"># Definindo uma função de callback</span>
-def process_output(line):
-    <span class="comment"># Processa cada linha de saída</span>
-    print(f"Saída do FFmpeg: {line}")
-
-<span class="comment"># Executando comandos no FFmpeg e exibindo logs</span>
-ffmpegImage([<span class="param">"-i"</span>, <span class="param">"input.mp4"</span>, <span class="param">"-vf"</span>, <span class="param">"scale=1280:720"</span>, <span class="param">"output.mp4"</span>],
-            logs=<span class="param">True</span>,
-            callback=<span class="param">process_output</span>)</code></pre>
-
-
-
-    <p><strong>Comando FFmpeg Gerado:</strong></p>
-    <p>O comando FFmpeg gerado será baseado na lista de comandos fornecida, precedido pelo binário FFmpeg. Por exemplo:</p>
-    <pre><code>ffmpeg -i input.mp4 -vf scale=1280:720 output.mp4</code></pre>
-</div>
-
-
+        <a href="#visao-geral" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
     </div>
-    <script src="scripts/script.js"></script>
-</body>
-<footer style="text-align: center; padding: 20px 0; background-color: #f8f8f8; text-decoration: none;">
-    <p><a href="https://github.com/PauloCesar-dev404" target="_top">© 2024 PauloCesar-dev404</a>|<a href="https://apoia.se/paulocesar-dev404" target="_top">Apoie o Dev Online</a></p>
-</footer>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
 
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="." title="m3u8-analyzer" class="md-header__button md-logo" aria-label="m3u8-analyzer" data-md-component="logo">
+      
+  <img src="assets/logo_noturno.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            m3u8-analyzer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Visão Geral
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="modo Noite"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="modo Noite" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="modo Dia"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="modo Dia" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PauloCesar-dev404/M3u8_Analyzer" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="m3u8-analyzer" class="md-nav__button md-logo" aria-label="m3u8-analyzer" data-md-component="logo">
+      
+  <img src="assets/logo_noturno.png" alt="logo">
+
+    </a>
+    m3u8-analyzer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PauloCesar-dev404/M3u8_Analyzer" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Visão Geral
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Visão Geral
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#visao-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visão Geral
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instalação
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uso" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uso
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Uso">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exemplo-basico" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exemplo Básico
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-manipulacao-de-playlists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Manipulação de Playlists
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uso-de-ffmpeg" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uso de FFmpeg
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#baixar-e-remuxar-usando-ffmpeg" class="md-nav__link">
+    <span class="md-ellipsis">
+      Baixar e Remuxar Usando FFmpeg
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-segmentos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Segmentos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-player" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Player
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concatenar-audio-e-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concatenar Áudio e Vídeo
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-uris-em-um-manifesto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter URIs em um Manifesto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-resolucoes-disponiveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Resoluções Disponíveis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verificar-criptografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificar Criptografia
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtrar-resolucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtrar Resoluções
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-tipo-de-playlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Tipo de Playlist
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-versao-do-manifesto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Versão do Manifesto
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contribuicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contribuição
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#licenca" class="md-nav__link">
+    <span class="md-ellipsis">
+      Licença
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#visao-geral" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visão Geral
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instalação
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uso" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uso
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Uso">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exemplo-basico" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exemplo Básico
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analise-e-manipulacao-de-playlists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Análise e Manipulação de Playlists
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uso-de-ffmpeg" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uso de FFmpeg
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#baixar-e-remuxar-usando-ffmpeg" class="md-nav__link">
+    <span class="md-ellipsis">
+      Baixar e Remuxar Usando FFmpeg
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-segmentos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Segmentos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-player" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Player
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concatenar-audio-e-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concatenar Áudio e Vídeo
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-uris-em-um-manifesto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter URIs em um Manifesto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-resolucoes-disponiveis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Resoluções Disponíveis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verificar-criptografia" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verificar Criptografia
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtrar-resolucoes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtrar Resoluções
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-tipo-de-playlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Tipo de Playlist
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#obter-versao-do-manifesto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obter Versão do Manifesto
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contribuicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contribuição
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#licenca" class="md-nav__link">
+    <span class="md-ellipsis">
+      Licença
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Visão Geral</h1>
+
+<p align="center">
+  <img src="assets/logo_noturno.png" alt="Logo">
+</p>
+<h2 id="visao-geral">Visão Geral</h2>
+<p>A biblioteca <code>m3u8_analyzer</code> facilita a análise e manipulação de playlists M3U8, com suporte para descriptografia, remuxagem e execução de comandos FFmpeg.</p>
+<h2 id="instalacao">Instalação</h2>
+<p>Para instalar a biblioteca, use o seguinte comando:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>m3u8-analyzer
+</code></pre></div>
+<h2 id="uso">Uso</h2>
+<h3 id="exemplo-basico">Exemplo Básico</h3>
+<p>Aqui está um exemplo básico de uso da biblioteca:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Analyzer</span>
+
+<span class="c1"># Crie uma instância da classe M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Obtenha informações sobre a playlist</span>
+<span class="n">info</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+<span class="c1"># Baixe e remuxe segmentos</span>
+<span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">downloader_and_remuxer_segments</span><span class="p">(</span>
+    <span class="n">url_playlist</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">,</span>
+    <span class="n">output</span><span class="o">=</span><span class="s2">&quot;output/video.mp4&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="analise-e-manipulacao-de-playlists">Análise e Manipulação de Playlists</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Obtenha informações sobre a playlist</span>
+<span class="n">info</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+<span class="c1"># Filtre segmentos por resolução</span>
+<span class="n">resolution_url</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">filter_resolution</span><span class="p">(</span><span class="s2">&quot;1920x1080&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">resolution_url</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="uso-de-ffmpeg">Uso de FFmpeg</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Analyzer</span>
+
+<span class="c1"># Execute um comando FFmpeg</span>
+<span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">ffmpegImage</span><span class="p">(</span>
+    <span class="n">commands</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;input.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;-vf&quot;</span><span class="p">,</span> <span class="s2">&quot;scale=1280:720&quot;</span><span class="p">,</span> <span class="s2">&quot;output.mp4&quot;</span><span class="p">],</span>
+    <span class="n">logs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FFmpeg Output: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="baixar-e-remuxar-usando-ffmpeg">Baixar e Remuxar Usando FFmpeg</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3u8Analyzer</span>
+
+<span class="n">analyze</span> <span class="o">=</span> <span class="n">M3u8Analyzer</span><span class="p">()</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://playlist.m3u8&#39;</span>
+<span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;final.mp4&#39;</span>
+
+<span class="n">analyze</span><span class="o">.</span><span class="n">M3u8AnalyzerDownloader</span><span class="o">.</span><span class="n">ffmpeg_donwloader</span><span class="p">(</span>
+    <span class="n">input_url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> 
+    <span class="n">output</span><span class="o">=</span><span class="n">output</span><span class="p">,</span> 
+    <span class="n">resolution</span><span class="o">=</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> 
+    <span class="n">type_playlist</span><span class="o">=</span><span class="s1">&#39;video&#39;</span><span class="p">,</span>
+    <span class="n">logs</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="obter-segmentos">Obter Segmentos</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3u8Analyzer</span>
+
+<span class="n">analyze</span> <span class="o">=</span> <span class="n">M3u8Analyzer</span><span class="p">()</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://playlist.m3u8&#39;</span>
+<span class="n">get</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">get_m3u8</span><span class="p">(</span><span class="n">url_m3u8</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+<span class="n">segments</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">get_segments</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">get</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="obter-player">Obter Player</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3u8Analyzer</span>
+
+<span class="n">analyze</span> <span class="o">=</span> <span class="n">M3u8Analyzer</span><span class="p">()</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://player-video-ex/playlist.m3u8&#39;</span>
+
+<span class="n">player</span> <span class="o">=</span> <span class="n">analyze</span><span class="o">.</span><span class="n">get_player_playlist</span><span class="p">(</span><span class="n">m3u8_url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="concatenar-audio-e-video">Concatenar Áudio e Vídeo</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3u8Analyzer</span>
+
+<span class="n">analyze</span> <span class="o">=</span> <span class="n">M3u8Analyzer</span><span class="p">()</span>
+
+<span class="c1"># Paths dos arquivos</span>
+<span class="n">audio</span> <span class="o">=</span> <span class="s1">&#39;audio.mp3&#39;</span>
+<span class="n">video</span> <span class="o">=</span> <span class="s1">&#39;video.mp4&#39;</span>
+<span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;final.mp4&#39;</span>
+
+<span class="n">analyze</span><span class="o">.</span><span class="n">M3u8AnalyzerDownloader</span><span class="o">.</span><span class="n">remuxer_audio_and_video</span><span class="p">(</span>
+    <span class="n">audioPath</span><span class="o">=</span><span class="n">audio</span><span class="p">,</span>
+    <span class="n">videoPath</span><span class="o">=</span><span class="n">video</span><span class="p">,</span>
+    <span class="n">outputPath</span><span class="o">=</span><span class="n">output</span><span class="p">,</span>
+    <span class="n">logs</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="obter-uris-em-um-manifesto">Obter URIs em um Manifesto</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Obtenha a lista de URIs dos segmentos</span>
+<span class="n">uris</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">uris</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="obter-resolucoes-disponiveis">Obter Resoluções Disponíveis</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Obtenha as resoluções disponíveis</span>
+<span class="n">resolutions</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">get_resolutions</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">resolutions</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="verificar-criptografia">Verificar Criptografia</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Verifique se a playlist está criptografada</span>
+<span class="n">is_encrypted</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">this_encrypted</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">is_encrypted</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="filtrar-resolucoes">Filtrar Resoluções</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Filtre e obtenha a URL do segmento com a resolução desejada</span>
+<span class="n">resolution_url</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">filter_resolution</span><span class="p">(</span><span class="s2">&quot;1920x1080&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">resolution_url</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="obter-tipo-de-playlist">Obter Tipo de Playlist</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Obtenha o tipo da playlist (VOD ou LIVE)</span>
+<span class="n">playlist_type</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">playlist_type</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">playlist_type</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="obter-versao-do-manifesto">Obter Versão do Manifesto</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+
+<span class="c1"># Crie uma instância de M3U8Playlist</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="c1"># Obtenha a versão do manifesto da playlist</span>
+<span class="n">version</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">version_manifest</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="contribuicao">Contribuição</h2>
+<p>Para contribuir com a biblioteca, envie um pull request ou abra uma issue no <a href="https://github.com/PauloCesar-dev404/m3u8_analyzer">repositório GitHub</a>.</p>
+<h2 id="licenca">Licença</h2>
+<p>Esta biblioteca é licenciada sob a <a href="LICENSE">Licença MIT</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.af256bd8.min.js"></script>
+      
+    
+  </body>
 </html>

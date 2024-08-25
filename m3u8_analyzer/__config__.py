@@ -9,7 +9,7 @@ from http.client import IncompleteRead
 
 from colorama import Fore, Style
 
-v = '1.0.2.4'
+v = '1.0.2.5'
 
 
 class Configurate:
@@ -315,6 +315,5 @@ def g():
     return load
 
 
-## verificar se ta sendo exutado
 if __name__ == '__main__':
     raise RuntimeError("erro de execução!")
