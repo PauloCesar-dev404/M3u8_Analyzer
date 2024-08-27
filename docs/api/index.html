@@ -46,6 +46,8 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../css/extra.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -120,9 +122,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="modo Noite"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Modo Escuro"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="modo Noite" for="__palette_1" hidden>
+      <label class="md-header__button md-icon" title="Modo Escuro" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -130,9 +132,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="modo Dia"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Modo Claro"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="modo Dia" for="__palette_0" hidden>
+      <label class="md-header__button md-icon" title="Modo Claro" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -249,11 +251,31 @@
   
   
     <li class="md-nav__item">
+      <a href="../instalacao/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Instalação
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Visão Geral
+    Iniciando
   </span>
   
 
@@ -388,6 +410,15 @@
   <a href="#m3u8_analyzer.M3u8Analyzer.M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output" class="md-nav__link">
     <span class="md-ellipsis">
       __filter_ffmpeg_output
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#m3u8_analyzer.M3u8Analyzer.M3u8Analyzer.M3u8AnalyzerDownloader.__handle_remove_readonly" class="md-nav__link">
+    <span class="md-ellipsis">
+      __handle_remove_readonly
     </span>
   </a>
   
@@ -632,6 +663,15 @@
   <a href="#m3u8_analyzer.M3u8Analyzer.M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output" class="md-nav__link">
     <span class="md-ellipsis">
       __filter_ffmpeg_output
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#m3u8_analyzer.M3u8Analyzer.M3u8Analyzer.M3u8AnalyzerDownloader.__handle_remove_readonly" class="md-nav__link">
+    <span class="md-ellipsis">
+      __handle_remove_readonly
     </span>
   </a>
   
@@ -1036,6 +1076,8 @@ Em seguida, faz uma requisição HTTP para obter a chave em formato hexadecimal.
     <div class="doc doc-contents ">
 
 
+      <p>Requer ffmpeg,use o comando configure-ffmpeg</p>
+
 
 
 
@@ -1068,7 +1110,6 @@ Em seguida, faz uma requisição HTTP para obter a chave em formato hexadecimal.
 <p>Essa função utiliza o caractere de retrocesso para mover o cursor para o
 início da linha e sobrescreve o conteúdo da linha com espaços em branco,
 limpando assim a linha no terminal.</p>
-<p>:return: None</p>
 
     </div>
 
@@ -1090,10 +1131,79 @@ limpando assim a linha no terminal.</p>
     <div class="doc doc-contents ">
 
       <p>Descriptografa um segmento de vídeo se necessário.</p>
-<p>:param path: Caminho do arquivo a ser descriptografado.
-:param key: Chave de descriptografia em bytes.
-:param iv: IV (vetor de inicialização) em bytes.
-:return: None</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>path</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Caminho do arquivo a ser descriptografado.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>key</code></td>
+            <td>
+                  <code>bytes</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chave de descriptografia em bytes.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>iv</code></td>
+            <td>
+                  <code>bytes</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>IV (vetor de inicialização) em bytes.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>logs</code></td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Se True, exibe a barra de progresso.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+      <p>Returns:
+    None</p>
 
     </div>
 
@@ -1114,9 +1224,72 @@ limpando assim a linha no terminal.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Concatena os segmentos de vídeo em um arquivo de vídeo usando FFmpeg.
-:param output: Caminho de saída para o vídeo final (dir/nome.mp4).
-:return: None</p>
+      <p>Concatena os segmentos de vídeo em um único arquivo de vídeo usando FFmpeg.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>output</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Caminho de saída para o vídeo final, incluindo o nome do arquivo e extensão (ex: 'dir/nome.mp4').</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>extension</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Extensão dos arquivos de vídeo a serem concatenados (ex: '.ts').</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -1138,9 +1311,32 @@ limpando assim a linha no terminal.</p>
     <div class="doc doc-contents ">
 
       <p>Filtra e imprime apenas as linhas que contêm a palavra 'Opening' na saída do ffmpeg.
-:param line: Linha de saída do ffmpeg.
-:param index: Índice de progresso.
-:return: None</p>
+Args:
+    line(bytes): Linha de saída do ffmpeg.
+    index(int): Índice de progresso.
+Returns:
+     None</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="m3u8_analyzer.M3u8Analyzer.M3u8Analyzer.M3u8AnalyzerDownloader.__handle_remove_readonly" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">__handle_remove_readonly</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Função de callback para lidar com arquivos somente leitura.</p>
 
     </div>
 
@@ -1161,8 +1357,42 @@ limpando assim a linha no terminal.</p>
 
     <div class="doc doc-contents ">
 
-      <p>ver qual So de usuario e retorna apensa a inicial</p>
+      <p>Verifica o sistema operacional do usuário e retorna uma inicial correspondente.</p>
+<p>O método utiliza a biblioteca <code>platform</code> para identificar o sistema operacional e retorna:
+- 'w' para Windows
+- 'l' para Linux ou macOS (Darwin)
+- 'null' para outros sistemas operacionais não suportados</p>
 
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Inicial correspondente ao sistema operacional do usuário.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <p><div class="highlight"><pre><span></span><code><span class="n">os_initial</span> <span class="o">=</span> <span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">__ocute_terminal</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">os_initial</span><span class="p">)</span>
+</code></pre></div>
+'w','l', ou 'null', dependendo do sistema operacional</p>
+</details>
     </div>
 
 </div>
@@ -1183,8 +1413,58 @@ limpando assim a linha no terminal.</p>
     <div class="doc doc-contents ">
 
       <p>Verifica se o vídeo contém faixas de áudio usando ffmpeg.</p>
-<p>:param path: Caminho do arquivo de vídeo.
-:return: True se o vídeo contiver áudio, False caso contrário.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>path</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Caminho do arquivo de vídeo.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True se o vídeo contiver áudio, False caso contrário.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -1206,8 +1486,58 @@ limpando assim a linha no terminal.</p>
     <div class="doc doc-contents ">
 
       <p>Verifica se o vídeo contém faixas de vídeo usando ffmpeg.</p>
-<p>:param path: Caminho do arquivo de vídeo.
-:return: True se o vídeo contiver vídeo, False caso contrário.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>path</code></td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Caminho do arquivo de vídeo.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True se o vídeo contiver vídeo, False caso contrário.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
     </div>
 
@@ -2904,6 +3234,8 @@ conteúdo da playlist M3U8.</p>
     
     
       <script src="../assets/javascripts/bundle.af256bd8.min.js"></script>
+      
+        <script src="../js/extra.js"></script>
       
     
   </body>

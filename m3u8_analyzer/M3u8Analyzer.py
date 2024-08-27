@@ -1,44 +1,34 @@
 import os
-import platform
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import time
 from typing import List, Dict, Tuple
+
 import requests
 from colorama import Fore, Style
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from .__config__ import g, Configurate
 
-data = g()
+from .__config__ import Configurate
+
+parser = Configurate()
+data = parser.loader()
+parser.configure()
 # Definições das variáveis
 STATUS = data.get('STATUS')
-if not STATUS == 'TRUE':
-    raise Warning("Arquivo de configuração inválido...")
+FFMPEG_URL = data.get('FFMPEG_URL')
 INSTALL_DIR = data.get('INSTALL_DIR')  # Valor padrão se não definido
-if not INSTALL_DIR:
-    g()
-
 FFMPEG_BINARY = data.get('FFMPEG_BINARY')
-if FFMPEG_BINARY:
-    path = os.path.join(INSTALL_DIR, FFMPEG_BINARY)
-    if os.path.exists(path):
-        g()
-    else:
-        g()
 VERSION = data.get('VERSION')
-if not VERSION:
-    g()
 __author__ = 'PauloCesar0073-dev404'
 __version__ = VERSION
 __ossystem = os.name
-# Configuração do diretório de instalação e binário do ffmpeg
 HOME = INSTALL_DIR
 ffmpeg_bin = fr'{INSTALL_DIR}\{FFMPEG_BINARY}'
-# Diretório temporário
 temp_dir = os.path.devnull
 
 
@@ -585,6 +575,8 @@ class M3u8Analyzer:
 
     @classmethod
     class M3u8AnalyzerDownloader:
+        """Requer ffmpeg,use o comando configure-ffmpeg"""
+
         @staticmethod
         def downloader_and_remuxer_segments(
                 url_playlist: str,
@@ -652,6 +644,10 @@ class M3u8Analyzer:
                 - Se ocorrer um erro durante a requisição HTTP ou o processo de concatenação, o método tentará remover arquivos temporários criados.
                 - A chave e o IV fornecidos são usados para descriptografar os segmentos se fornecidos; caso contrário, os segmentos são baixados diretamente.
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             if not (url_playlist.startswith('http://') or url_playlist.startswith('https://')):
                 raise ValueError("A URL é inválida!")
 
@@ -721,8 +717,8 @@ class M3u8Analyzer:
                 # Remover o diretório temporário
                 if os.path.exists(temp_dir):
                     try:
-                        sys.stdout.flush()  # Certificar-se de que toda a saída foi impressa antes de remover o diretório
-                        shutil.rmtree(temp_dir, ignore_errors=True)
+                        sys.stdout.flush()
+                        shutil.rmtree(temp_dir, onerror=M3u8Analyzer.M3u8AnalyzerDownloader.__handle_remove_readonly)
                     except PermissionError as e:
                         print(f"Permissão negada ao tentar remover o diretório {temp_dir}: {e}")
                     except OSError as e:
@@ -731,19 +727,27 @@ class M3u8Analyzer:
                         print(f"Erro inesperado ao remover o diretório {temp_dir}: {e}")
 
         @staticmethod
+        def __handle_remove_readonly(func, path, exc_info):
+            """Função de callback para lidar com arquivos somente leitura."""
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+
+        @staticmethod
         def __baixar_segmento(url_segmento: str, path: str, index, total, key: bytes = None, iv: bytes = None,
                               headers: dict = None, logs=None):
             global Novideo, Noaudio
             """
             Baixa um segmento de vídeo e, se necessário, o descriptografa.
             Em seguida, verifica se o vídeo possui áudio.
-
-            :param url_segmento: URL do segmento.
-            :param path: Caminho de saída para salvar o segmento.
-            :param key: Chave de descriptografia em bytes (opcional).
-            :param iv: IV (vetor de inicialização) em bytes (opcional).
-            :param headers: Cabeçalhos HTTP adicionais para a requisição (opcional).
-            :return: None
+            Args:
+                url_segmento(str): URL do segmento.
+                path(str): Caminho de saída para salvar o segmento.
+                key(bytes,opcional): Chave de descriptografia em bytes (opcional).
+                iv(bytes,opcional): IV (vetor de inicialização) em bytes (opcional).
+                headers(dict,opcional): Cabeçalhos HTTP adicionais para a requisição (opcional).
+                logs(bool,opcional): Exibe o progresso.
+            Returns: 
+                  None
             """
             headers_default = {
                 "Accept": "application/json, text/plain, */*",
@@ -799,10 +803,13 @@ class M3u8Analyzer:
             """
             Descriptografa um segmento de vídeo se necessário.
 
-            :param path: Caminho do arquivo a ser descriptografado.
-            :param key: Chave de descriptografia em bytes.
-            :param iv: IV (vetor de inicialização) em bytes.
-            :return: None
+            Args:
+                path (str): Caminho do arquivo a ser descriptografado.
+                key (bytes): Chave de descriptografia em bytes.
+                iv (bytes): IV (vetor de inicialização) em bytes.
+                logs (bool, optional): Se True, exibe a barra de progresso.
+            Returns:
+                None
             """
             try:
                 # Abre o arquivo e lê os bytes do segmento
@@ -815,9 +822,39 @@ class M3u8Analyzer:
                 decryptor = cipher.decryptor()
                 unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
 
-                # Descriptografa o segmento
-                decrypted_segment = decryptor.update(segmento_bytes) + decryptor.finalize()
-                segment = unpadder.update(decrypted_segment) + unpadder.finalize()
+                # Define o tamanho do buffer e o progresso
+                buffer_size = 64 * 1024  # 64 KB
+                total_size = len(segmento_bytes)
+                decrypted_segment = bytearray()
+
+                if logs:
+                    # Exibe a barra de progresso se logs for True
+                    for i in range(0, total_size, buffer_size):
+                        chunk = segmento_bytes[i:i + buffer_size]
+                        decrypted_chunk = decryptor.update(chunk)
+                        decrypted_segment.extend(decrypted_chunk)
+
+                        # Atualiza a barra de progresso
+                        progress = (i + len(chunk)) / total_size * 100
+                        sys.stdout.write(f'\rDescriptografando: {progress:.2f}%')
+                        sys.stdout.flush()
+
+                    decrypted_segment.extend(decryptor.finalize())
+                    segment = unpadder.update(decrypted_segment) + unpadder.finalize()
+
+                    # Conclui a barra de progresso
+                    sys.stdout.write('\rDescriptografado com sucesso!            \n')
+                    sys.stdout.flush()
+
+                else:
+                    # Sem barra de progresso
+                    for i in range(0, total_size, buffer_size):
+                        chunk = segmento_bytes[i:i + buffer_size]
+                        decrypted_chunk = decryptor.update(chunk)
+                        decrypted_segment.extend(decrypted_chunk)
+
+                    decrypted_segment.extend(decryptor.finalize())
+                    segment = unpadder.update(decrypted_segment) + unpadder.finalize()
 
                 # Escreve o segmento descriptografado de volta ao arquivo
                 with open(path, 'wb') as arquivo_segmento:
@@ -841,9 +878,16 @@ class M3u8Analyzer:
             """
             Verifica se o vídeo contém faixas de áudio usando ffmpeg.
 
-            :param path: Caminho do arquivo de vídeo.
-            :return: True se o vídeo contiver áudio, False caso contrário.
+            Args:
+                path: Caminho do arquivo de vídeo.
+
+            Returns:
+                 bool: True se o vídeo contiver áudio, False caso contrário.
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             try:
                 # Comando para obter informações sobre o arquivo usando ffmpeg
                 resultado = subprocess.run(
@@ -867,9 +911,16 @@ class M3u8Analyzer:
             """
             Verifica se o vídeo contém faixas de vídeo usando ffmpeg.
 
-            :param path: Caminho do arquivo de vídeo.
-            :return: True se o vídeo contiver vídeo, False caso contrário.
+            Args:
+                path: Caminho do arquivo de vídeo.
+
+            Returns:
+                bool: True se o vídeo contiver vídeo, False caso contrário.
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             try:
                 # Comando para obter informações sobre o arquivo usando ffmpeg
                 resultado = subprocess.run(
@@ -897,19 +948,20 @@ class M3u8Analyzer:
             início da linha e sobrescreve o conteúdo da linha com espaços em branco,
             limpando assim a linha no terminal.
 
-            :return: None
             """
             # Mover o cursor para o início da linha e sobrescrever com espaços
             sys.stdout.write('\r' + ' ' * 100 + '\r')
             sys.stdout.flush()
 
         @staticmethod
-        def __filter_ffmpeg_output(line, index):
+        def __filter_ffmpeg_output(line: bytes, index: int):
             """
             Filtra e imprime apenas as linhas que contêm a palavra 'Opening' na saída do ffmpeg.
-            :param line: Linha de saída do ffmpeg.
-            :param index: Índice de progresso.
-            :return: None
+            Args:
+                line(bytes): Linha de saída do ffmpeg.
+                index(int): Índice de progresso.
+            Returns:
+                 None
             """
             lines = line.decode('utf-8').strip()
             # Verifica se a linha contém a palavra 'Opening'
@@ -925,10 +977,19 @@ class M3u8Analyzer:
         @staticmethod
         def __ffmpeg_concatener(output: str, extension: str):
             """
-            Concatena os segmentos de vídeo em um arquivo de vídeo usando FFmpeg.
-            :param output: Caminho de saída para o vídeo final (dir/nome.mp4).
-            :return: None
+            Concatena os segmentos de vídeo em um único arquivo de vídeo usando FFmpeg.
+
+            Args:
+                output (str): Caminho de saída para o vídeo final, incluindo o nome do arquivo e extensão (ex: 'dir/nome.mp4').
+                extension (str): Extensão dos arquivos de vídeo a serem concatenados (ex: '.ts').
+
+            Returns:
+                None
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             # Defina o nome do arquivo de lista
             arquivo_lista = fr'{temp_dir}\lista.txt'
 
@@ -969,7 +1030,8 @@ class M3u8Analyzer:
             elif So == 'l':
                 # Executa o comando FFmpeg ocultando saídas no terminal Linux
                 process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
+            else:
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             index = 0
             while True:
                 output = process.stdout.readline()
@@ -1048,6 +1110,10 @@ class M3u8Analyzer:
                 - A saída do FFmpeg pode ser controlada com o parâmetro `logs`, que, se definido como True, exibe as mensagens de progresso e erros.
 
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             cmd = ''
             if not isinstance(type_playlist, str):
                 raise SyntaxError("O parâmetro 'type_playlist' é necessário!")
@@ -1099,6 +1165,8 @@ class M3u8Analyzer:
             elif So == 'l':
                 # Executa o comando FFmpeg ocultando saídas no terminal Linux
                 process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
             index = 0
             while True:
@@ -1162,6 +1230,10 @@ class M3u8Analyzer:
                 - A remoção dos arquivos de áudio e vídeo de entrada após o remuxing é tentada, mas qualquer falha na remoção é ignorada.
                 - O comportamento da exibição de logs é controlado pelo parâmetro `logs`. Se `logs` for True, as mensagens de saída do FFmpeg são impressas no console.
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             if not os.path.exists(audioPath) or not os.path.exists(videoPath):
                 raise ValueError("Os caminhos dos arquivos de áudio ou vídeo não foram encontrados...")
 
@@ -1188,6 +1260,8 @@ class M3u8Analyzer:
             elif So == 'l':
                 # Executa o comando FFmpeg ocultando saídas no terminal Linux
                 process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
             # Envia a saída em tempo real para o cliente
             for line in iter(process.stdout.readline, b''):
@@ -1257,6 +1331,10 @@ class M3u8Analyzer:
                 - Se `callback` for fornecido, a função será chamada com cada linha de saída do FFmpeg, permitindo processamento personalizado da saída.
                 - O método é capaz de ocultar a janela do terminal no Windows e suprimir a saída no Linux conforme a configuração do terminal.
             """
+            if not os.path.exists(ffmpeg_bin):
+                raise Warning(
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+
             if not isinstance(commands, list):
                 raise TypeError("O parâmetro 'commands' deve ser uma lista.")
 
@@ -1274,12 +1352,12 @@ class M3u8Analyzer:
             elif So == 'l':
                 # Executa o comando FFmpeg ocultando saídas no terminal Linux
                 process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, text=True)
-
+            else:
+                process = subprocess.Popen(cmd, stdout=subprocess.STDOUT, stderr=subprocess.STDOUT, text=True)
             while True:
                 output_line = process.stdout.readline()
                 if output_line == '' and process.poll() is not None:
                     break
-
                 if logs:
                     # Exibir a saída e remover linhas em branco
                     clean_output = "\n".join(
@@ -1293,14 +1371,32 @@ class M3u8Analyzer:
 
         @staticmethod
         def __ocute_terminal():
-            """ver qual So de usuario e retorna apensa a inicial"""
+            """
+            Verifica o sistema operacional do usuário e retorna uma inicial correspondente.
+
+            O método utiliza a biblioteca `platform` para identificar o sistema operacional e retorna:
+            - 'w' para Windows
+            - 'l' para Linux ou macOS (Darwin)
+            - 'null' para outros sistemas operacionais não suportados
+
+            Returns:
+                str: Inicial correspondente ao sistema operacional do usuário.
+
+            Example:
+                ```python
+                os_initial = M3U8Analyzer.__ocute_terminal()
+                print(os_initial)
+                ```
+                'w','l', ou 'null', dependendo do sistema operacional
+            """
+            import platform
             system = platform.system()
             if system == 'Windows':
                 return 'w'
-            elif system == 'Linux':
+            elif system == 'Linux' or system == 'Darwin':
                 return 'l'
             else:
-                return "null"
+                return 'null'
 
 
 class M3U8Playlist:
@@ -1493,3 +1589,6 @@ class ParsingM3u8:
             - Se os cabeçalhos forem fornecidos, eles serão utilizados na requisição para obter o conteúdo da playlist.
         """
         return M3U8Playlist(url=url, headers=headers)
+
+
+wrapper_playlists = ParsingM3u8()

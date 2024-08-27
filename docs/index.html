@@ -9,6 +9,8 @@
       
       
       
+        <link rel="prev" href="instalacao/">
+      
       
         <link rel="next" href="api/">
       
@@ -45,6 +47,8 @@
     
     
       <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/extra.css">
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -107,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Visão Geral
+              Iniciando
             
           </span>
         </div>
@@ -120,9 +124,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="modo Noite"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Modo Escuro"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="modo Noite" for="__palette_1" hidden>
+      <label class="md-header__button md-icon" title="Modo Escuro" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -130,9 +134,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="modo Dia"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Modo Claro"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="modo Dia" for="__palette_0" hidden>
+      <label class="md-header__button md-icon" title="Modo Claro" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -246,6 +250,26 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="instalacao/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Instalação
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -260,7 +284,7 @@
           
   
   <span class="md-ellipsis">
-    Visão Geral
+    Iniciando
   </span>
   
 
@@ -271,7 +295,7 @@
         
   
   <span class="md-ellipsis">
-    Visão Geral
+    Iniciando
   </span>
   
 
@@ -294,15 +318,6 @@
   <a href="#visao-geral" class="md-nav__link">
     <span class="md-ellipsis">
       Visão Geral
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#instalacao" class="md-nav__link">
-    <span class="md-ellipsis">
-      Instalação
     </span>
   </a>
   
@@ -520,15 +535,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#instalacao" class="md-nav__link">
-    <span class="md-ellipsis">
-      Instalação
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#uso" class="md-nav__link">
     <span class="md-ellipsis">
       Uso
@@ -696,40 +702,20 @@
   
 
 
-  <h1>Visão Geral</h1>
+  <h1>Iniciando</h1>
 
 <p align="center">
   <img src="assets/logo_noturno.png" alt="Logo">
 </p>
 <h2 id="visao-geral">Visão Geral</h2>
 <p>A biblioteca <code>m3u8_analyzer</code> facilita a análise e manipulação de playlists M3U8, com suporte para descriptografia, remuxagem e execução de comandos FFmpeg.</p>
-<h2 id="instalacao">Instalação</h2>
-<p>Para instalar a biblioteca, use o seguinte comando:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>m3u8-analyzer
-</code></pre></div>
 <h2 id="uso">Uso</h2>
 <h3 id="exemplo-basico">Exemplo Básico</h3>
 <p>Aqui está um exemplo básico de uso da biblioteca:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Analyzer</span>
-
-<span class="c1"># Crie uma instância da classe M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
-
-<span class="c1"># Obtenha informações sobre a playlist</span>
-<span class="n">info</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
-
-<span class="c1"># Baixe e remuxe segmentos</span>
-<span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">downloader_and_remuxer_segments</span><span class="p">(</span>
-    <span class="n">url_playlist</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">,</span>
-    <span class="n">output</span><span class="o">=</span><span class="s2">&quot;output/video.mp4&quot;</span>
-<span class="p">)</span>
-</code></pre></div>
 <h3 id="analise-e-manipulacao-de-playlists">Análise e Manipulação de Playlists</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
 <span class="c1"># Obtenha informações sobre a playlist</span>
 <span class="n">info</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
@@ -740,10 +726,10 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">resolution_url</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="uso-de-ffmpeg">Uso de FFmpeg</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Analyzer</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3u8Analyzer</span>
 
 <span class="c1"># Execute um comando FFmpeg</span>
-<span class="n">M3U8Analyzer</span><span class="o">.</span><span class="n">ffmpegImage</span><span class="p">(</span>
+<span class="n">M3u8Analyzer</span><span class="o">.</span><span class="n">M3u8AnalyzerDownloader</span><span class="o">.</span><span class="n">ffmpegImage</span><span class="p">(</span>
     <span class="n">commands</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;input.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;-vf&quot;</span><span class="p">,</span> <span class="s2">&quot;scale=1280:720&quot;</span><span class="p">,</span> <span class="s2">&quot;output.mp4&quot;</span><span class="p">],</span>
     <span class="n">logs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FFmpeg Output: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -804,60 +790,57 @@
 <span class="p">)</span>
 </code></pre></div>
 <h3 id="obter-uris-em-um-manifesto">Obter URIs em um Manifesto</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
 <span class="c1"># Obtenha a lista de URIs dos segmentos</span>
 <span class="n">uris</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">uris</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="obter-resolucoes-disponiveis">Obter Resoluções Disponíveis</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
 <span class="c1"># Obtenha as resoluções disponíveis</span>
 <span class="n">resolutions</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">get_resolutions</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">resolutions</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="verificar-criptografia">Verificar Criptografia</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
 <span class="c1"># Verifique se a playlist está criptografada</span>
 <span class="n">is_encrypted</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">this_encrypted</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">is_encrypted</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="filtrar-resolucoes">Filtrar Resoluções</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
 <span class="c1"># Filtre e obtenha a URL do segmento com a resolução desejada</span>
 <span class="n">resolution_url</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">filter_resolution</span><span class="p">(</span><span class="s2">&quot;1920x1080&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">resolution_url</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="obter-tipo-de-playlist">Obter Tipo de Playlist</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
-<span class="c1"># Obtenha o tipo da playlist (VOD ou LIVE)</span>
+<span class="c1"># Obtenha o tipo da playlist &#39;Master&#39;, &#39;Master encrypted&#39;, &#39;Segments&#39;, &#39;Segments encrypted&#39;, &#39;Segments Master&#39;,&#39;Desconhecido&#39;</span>
 <span class="n">playlist_type</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">playlist_type</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">playlist_type</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="obter-versao-do-manifesto">Obter Versão do Manifesto</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">M3U8Playlist</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">m3u8_analyzer</span> <span class="kn">import</span> <span class="n">wrapper_playlists</span>
 
-<span class="c1"># Crie uma instância de M3U8Playlist</span>
-<span class="n">playlist</span> <span class="o">=</span> <span class="n">M3U8Playlist</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
+
+<span class="n">playlist</span> <span class="o">=</span> <span class="n">wrapper_playlists</span><span class="o">.</span><span class="n">parsing_m3u8</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/playlist.m3u8&quot;</span><span class="p">)</span>
 
 <span class="c1"># Obtenha a versão do manifesto da playlist</span>
 <span class="n">version</span> <span class="o">=</span> <span class="n">playlist</span><span class="o">.</span><span class="n">version_manifest</span><span class="p">()</span>
@@ -917,6 +900,8 @@
     
     
       <script src="assets/javascripts/bundle.af256bd8.min.js"></script>
+      
+        <script src="js/extra.js"></script>
       
     
   </body>

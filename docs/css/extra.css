@@ -1,0 +1,44 @@
+/* extra.css */
+
+pre {
+    position: relative;
+    padding: 1em; 
+    border-radius: 4px; 
+
+    overflow: hidden; 
+}
+
+/* Estilo do contêiner do botão */
+.copy-button-wrapper {
+    position: absolute; 
+    top: 10px; 
+    right: 0px; 
+    z-index: 20; 
+}
+
+/* Estilo do botão */
+.copy-button {
+    background: transparent; /* Cor de fundo do botão */
+    border: none; /* Remove bordas do botão */
+    color: #4d4d4d; /* Cor do texto */
+    padding: 4px 8px; /* Espaçamento interno do botão reduzido */
+    font-size: 12px; /* Tamanho da fonte reduzido */
+    border-radius: 4px; /* Arredonda os cantos do botão */
+    cursor: pointer; /* Muda o cursor para indicar que o botão é clicável */
+    display: flex;
+    align-items: center; /* Alinha o SVG e o texto verticalmente */
+    gap: 4px; 
+}
+
+.copy-button svg {
+    width: 20px; /* Largura do SVG reduzida */
+    height: 20px; /* Altura do SVG reduzida */
+}
+
+.copy-button.success {
+    color: #515151; /* Cor do texto quando o texto é copiado */
+}
+
+.copy-button.success svg path {
+    fill: #515151; /* Cor do ícone quando o texto é copiado */
+}
