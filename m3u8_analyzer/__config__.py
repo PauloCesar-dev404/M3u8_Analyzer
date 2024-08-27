@@ -11,7 +11,9 @@ from http.client import IncompleteRead
 import requests
 from colorama import Fore, Style
 
-v = '1.0.3.3'
+from M3u8_Analyzer.m3u8_analyzer.exeptions import M3u8NetworkingError, M3u8FileError
+
+v = '1.0.3.4'
 
 
 class Configurate:
@@ -127,15 +129,48 @@ class Configurate:
                 sys.stdout.write("\nDownload completo.\n")
                 sys.stdout.flush()
 
+
+        except requests.exceptions.InvalidProxyURL as e:
+            raise M3u8NetworkingError(f"Erro: URL de proxy inválida: {e}")
+        except requests.exceptions.InvalidURL:
+            raise M3u8NetworkingError("Erro: URL inválida fornecida.")
+        except requests.exceptions.InvalidSchema:
+            raise M3u8NetworkingError("Erro: URL inválida, esquema não suportado.")
+        except requests.exceptions.MissingSchema:
+            raise M3u8NetworkingError("Erro: URL inválida, esquema ausente.")
+        except requests.exceptions.InvalidHeader as e:
+            raise M3u8NetworkingError(f"Erro de cabeçalho inválido: {e}")
+        except ValueError as e:
+            raise M3u8FileError(f"Erro de valor: {e}")
+        except requests.exceptions.ContentDecodingError as e:
+            raise M3u8NetworkingError(f"Erro de decodificação de conteúdo: {e}")
+        except requests.exceptions.BaseHTTPError as e:
+            raise M3u8NetworkingError(f"Erro HTTP básico: {e}")
+        except requests.exceptions.SSLError as e:
+            raise M3u8NetworkingError(f"Erro SSL: {e}")
+        except requests.exceptions.ProxyError as e:
+            raise M3u8NetworkingError(f"Erro de proxy: {e}")
+        except requests.exceptions.ConnectionError:
+            raise M3u8NetworkingError("Erro: O servidor ou o servidor encerrou a conexão.")
+        except requests.exceptions.HTTPError as e:
+            raise M3u8NetworkingError(f"Erro HTTP: {e}")
+        except requests.exceptions.Timeout:
+            raise M3u8NetworkingError(
+                "Erro de tempo esgotado: A conexão com o servidor demorou muito para responder.")
+        except requests.exceptions.TooManyRedirects:
+            raise M3u8NetworkingError("Erro de redirecionamento: Muitos redirecionamentos.")
+        except requests.exceptions.URLRequired:
+            raise M3u8NetworkingError("Erro: URL é necessária para a solicitação.")
+        except requests.exceptions.ChunkedEncodingError as e:
+            raise M3u8NetworkingError(f"Erro de codificação em partes: {e}")
+        except requests.exceptions.StreamConsumedError:
+            raise M3u8NetworkingError("Erro: Fluxo de resposta já consumido.")
+        except requests.exceptions.RetryError as e:
+            raise M3u8NetworkingError(f"Erro de tentativa: {e}")
+        except requests.exceptions.UnrewindableBodyError:
+            raise M3u8NetworkingError("Erro: Corpo da solicitação não pode ser rebobinado.")
         except requests.exceptions.RequestException as e:
-            sys.stderr.write(f"Erro ao baixar o arquivo: {e}\n")
-            raise
-        except IOError as e:
-            if isinstance(e, IncompleteRead):
-                sys.stderr.write("Erro de conexão: Leitura incompleta\n")
-            else:
-                sys.stderr.write(f"Ocorreu um erro de I/O: {str(e)}\n")
-            raise
+            raise M3u8NetworkingError(f"Erro de conexão: Não foi possível se conectar ao servidor. Detalhes: {e}")
 
     def __extract_zip(self, zip_path: str, extract_to: str):
         """Descompacta o arquivo ZIP no diretório especificado."""
@@ -230,7 +265,7 @@ class Configurate:
         """Remove os binários"""
         dt = self.loader()
         install_dir = dt.get('INSTALL_DIR')
-        configpath = os.path.join(self.VENV_PATH,".m3u8_analyzer_config")
+        configpath = os.path.join(self.VENV_PATH, ".m3u8_analyzer_config")
         if install_dir and os.path.exists(install_dir):
             try:
                 bin_path = os.path.join(install_dir, self.FFMPEG_BINARY)
@@ -264,7 +299,7 @@ class Configurate:
             else:
                 print("Binários ffmpeg já instalados.")
         except Exception as e:
-            print(f"Erro ao configurar os binários: {e}")
+            M3u8FileError(f"Erro ao configurar os binários: {e}")
 
 
 def install_bins():

@@ -14,6 +14,7 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from .__config__ import Configurate
+from .exeptions import M3u8Error, M3u8NetworkingError, M3u8FileError, M3u8FfmpegDownloadError
 
 parser = Configurate()
 data = parser.loader()
@@ -46,13 +47,14 @@ class M3u8Analyzer:
         """
         Obtém o conteúdo de um arquivo M3U8 a partir de uma URL HLS.
 
-        Este método permite acessar, visualizar ou salvar playlists M3U8 utilizadas em transmissões de vídeo sob demanda.
+        Este método permite acessar, visualizar ou salvar playlists M3U8 utilizadas em transmissões de vídeo sob
+        demanda.
 
-        Args:
-            url_m3u8 (str): A URL do arquivo M3U8 que você deseja acessar.
-            headers (dict, optional): Cabeçalhos HTTP opcionais para a requisição. Se não forem fornecidos, serão usados cabeçalhos padrão.
-            save_in_file (str, optional): Nome do arquivo para salvar o conteúdo M3U8. Se fornecido, o conteúdo da playlist será salvo no diretório atual com a extensão `.m3u8`.
-            timeout (int, optional): Tempo máximo (em segundos) para aguardar uma resposta do servidor. O padrão é 20 segundos.
+        Args: url_m3u8 (str): A URL do arquivo M3U8 que você deseja acessar. headers (dict, optional): Cabeçalhos
+        HTTP opcionais para a requisição. Se não forem fornecidos, serão usados cabeçalhos padrão. save_in_file (str,
+        optional): Nome do arquivo para salvar o conteúdo M3U8. Se fornecido, o conteúdo da playlist será salvo no
+        diretório atual com a extensão `.m3u8`. timeout (int, optional): Tempo máximo (em segundos) para aguardar uma
+        resposta do servidor. O padrão é 20 segundos.
 
         Returns:
             str: O conteúdo do arquivo M3U8 como uma string se a requisição for bem-sucedida.
@@ -82,9 +84,9 @@ class M3u8Analyzer:
 
         if headers:
             if not isinstance(headers, dict):
-                raise ValueError("headers deve ser um dicionário válido!")
+                raise M3u8Error("headers deve ser um dicionário válido!", errors=['headers not dict'])
         if not (url_m3u8.startswith('https://') or url_m3u8.startswith('http://')):
-            raise ValueError("A URL é inválida!")
+            raise M3u8Error(f"Este valor não se parece ser uma url válida!")
         try:
             time = 20
             respo = ''
@@ -100,7 +102,8 @@ class M3u8Analyzer:
                 "Sec-Ch-Ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"118\", \"Chromium\";v=\"118\"",
                 "Sec-Ch-Ua-Mobile": "?0",
                 "Sec-Ch-Ua-Platform": "\"Windows\"",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                              "Chrome/118.0.0.0 Safari/537.36"
             }
             session = requests.session()
             if timeout:
@@ -116,14 +119,44 @@ class M3u8Analyzer:
                 return r.text
             else:
                 return None
+        except requests.exceptions.SSLError as e:
+            raise M3u8NetworkingError(f"Erro SSL: {e}")
+        except requests.exceptions.ProxyError as e:
+            raise M3u8NetworkingError(f"Erro de proxy: {e}")
         except requests.exceptions.ConnectionError:
-            raise ConnectionAbortedError(f"Erro o servidor ou servidor encerrou a conexão.")
-        except requests.exceptions.HTTPError:
-            raise ConnectionRefusedError("Erro conexão recusada.")
+            raise M3u8NetworkingError("Erro: O servidor ou o servidor encerrou a conexão.")
+        except requests.exceptions.HTTPError as e:
+            raise M3u8NetworkingError(f"Erro HTTP: {e}")
         except requests.exceptions.Timeout:
-            raise TimeoutError("Erro de tempo esgotado: A conexão com o servidor demorou muito para responder.")
-        except requests.exceptions.RequestException:
-            raise ConnectionError("Erro de conexão: Não foi possível se conectar ao servidor.")
+            raise M3u8NetworkingError("Erro de tempo esgotado: A conexão com o servidor demorou muito para responder.")
+        except requests.exceptions.TooManyRedirects:
+            raise M3u8NetworkingError("Erro de redirecionamento: Muitos redirecionamentos.")
+        except requests.exceptions.URLRequired:
+            raise M3u8NetworkingError("Erro: URL é necessária para a solicitação.")
+        except requests.exceptions.InvalidProxyURL as e:
+            raise M3u8NetworkingError(f"Erro: URL de proxy inválida: {e}")
+        except requests.exceptions.InvalidURL:
+            raise M3u8NetworkingError("Erro: URL inválida fornecida.")
+        except requests.exceptions.InvalidSchema:
+            raise M3u8NetworkingError("Erro: URL inválida, esquema não suportado.")
+        except requests.exceptions.MissingSchema:
+            raise M3u8NetworkingError("Erro: URL inválida, esquema ausente.")
+        except requests.exceptions.InvalidHeader as e:
+            raise M3u8NetworkingError(f"Erro de cabeçalho inválido: {e}")
+        except requests.exceptions.ChunkedEncodingError as e:
+            raise M3u8NetworkingError(f"Erro de codificação em partes: {e}")
+        except requests.exceptions.ContentDecodingError as e:
+            raise M3u8NetworkingError(f"Erro de decodificação de conteúdo: {e}")
+        except requests.exceptions.StreamConsumedError:
+            raise M3u8NetworkingError("Erro: Fluxo de resposta já consumido.")
+        except requests.exceptions.RetryError as e:
+            raise M3u8NetworkingError(f"Erro de tentativa: {e}")
+        except requests.exceptions.UnrewindableBodyError:
+            raise M3u8NetworkingError("Erro: Corpo da solicitação não pode ser rebobinado.")
+        except requests.exceptions.RequestException as e:
+            raise M3u8NetworkingError(f"Erro de conexão: Não foi possível se conectar ao servidor. Detalhes: {e}")
+        except requests.exceptions.BaseHTTPError as e:
+            raise M3u8NetworkingError(f"Erro HTTP básico: {e}")
 
     @staticmethod
     def get_high_resolution(m3u8_content: str):
@@ -276,8 +309,10 @@ class M3u8Analyzer:
                         return 'Segments Master'
             else:
                 return 'Desconhecido'
+        except re.error as e:
+            raise M3u8FileError(f"Erro ao processar o conteúdo M3U8: {str(e)}")
         except Exception as e:
-            return f'Erro ao processar o conteúdo: {e}'
+            raise M3u8FileError(f"Erro inesperado ao processar o conteúdo M3U8: {str(e)}")
 
     @staticmethod
     def get_player_playlist(m3u8_url: str) -> str:
@@ -453,7 +488,7 @@ class M3u8Analyzer:
         """
         # Verifica se o conteúdo é uma URL
         if re.match(r'^https?://', content):
-            raise ValueError("O conteúdo não deve ser uma URL")
+            raise M3u8Error(f"Este valor não se parece ser uma string de uma playlist m3u8 válida!")
 
         # Separação das linhas da playlist, ignorando linhas vazias e comentários
         urls_segmentos = [linha for linha in content.splitlines() if linha and not linha.startswith('#')]
@@ -559,17 +594,63 @@ class M3u8Analyzer:
                         "Sec-Ch-Ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"118\", \"Chromium\";v=\"118\"",
                         "Sec-Ch-Ua-Mobile": "?0",
                         "Sec-Ch-Ua-Platform": "\"Windows\"",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
                                       "Chrome/118.0.0.0 Safari/537.36"
                     }
                     headers = headers_default
-                resp = requests.get(url_key, headers=headers)
-                resp.raise_for_status()
-                key_bytes = resp.content
-                key_hex = key_bytes.hex()
-                data['key'] = key_hex
-                data['iv'] = iv_hex.split('0x')[1]
-                return data
+
+                    try:
+                        resp = requests.get(url_key, headers=headers)
+                        resp.raise_for_status()
+                        key_bytes = resp.content
+                        key_hex = key_bytes.hex()
+                        data['key'] = key_hex
+                        if iv_hex:
+                            data['iv'] = iv_hex[2:]  # Remove '0x' prefix
+                        return data
+                    except requests.exceptions.InvalidProxyURL as e:
+                        raise M3u8NetworkingError(f"Erro: URL de proxy inválida: {e}")
+                    except requests.exceptions.InvalidURL:
+                        raise M3u8NetworkingError("Erro: URL inválida fornecida.")
+                    except requests.exceptions.InvalidSchema:
+                        raise M3u8NetworkingError("Erro: URL inválida, esquema não suportado.")
+                    except requests.exceptions.MissingSchema:
+                        raise M3u8NetworkingError("Erro: URL inválida, esquema ausente.")
+                    except requests.exceptions.InvalidHeader as e:
+                        raise M3u8NetworkingError(f"Erro de cabeçalho inválido: {e}")
+                    except ValueError as e:
+                        raise M3u8FileError(f"Erro de valor: {e}")
+                    except requests.exceptions.ContentDecodingError as e:
+                        raise M3u8NetworkingError(f"Erro de decodificação de conteúdo: {e}")
+                    except requests.exceptions.BaseHTTPError as e:
+                        raise M3u8NetworkingError(f"Erro HTTP básico: {e}")
+                    except requests.exceptions.SSLError as e:
+                        raise M3u8NetworkingError(f"Erro SSL: {e}")
+                    except requests.exceptions.ProxyError as e:
+                        raise M3u8NetworkingError(f"Erro de proxy: {e}")
+                    except requests.exceptions.ConnectionError:
+                        raise M3u8NetworkingError("Erro: O servidor ou o servidor encerrou a conexão.")
+                    except requests.exceptions.HTTPError as e:
+                        raise M3u8NetworkingError(f"Erro HTTP: {e}")
+                    except requests.exceptions.Timeout:
+                        raise M3u8NetworkingError(
+                            "Erro de tempo esgotado: A conexão com o servidor demorou muito para responder.")
+                    except requests.exceptions.TooManyRedirects:
+                        raise M3u8NetworkingError("Erro de redirecionamento: Muitos redirecionamentos.")
+                    except requests.exceptions.URLRequired:
+                        raise M3u8NetworkingError("Erro: URL é necessária para a solicitação.")
+                    except requests.exceptions.ChunkedEncodingError as e:
+                        raise M3u8NetworkingError(f"Erro de codificação em partes: {e}")
+                    except requests.exceptions.StreamConsumedError:
+                        raise M3u8NetworkingError("Erro: Fluxo de resposta já consumido.")
+                    except requests.exceptions.RetryError as e:
+                        raise M3u8NetworkingError(f"Erro de tentativa: {e}")
+                    except requests.exceptions.UnrewindableBodyError:
+                        raise M3u8NetworkingError("Erro: Corpo da solicitação não pode ser rebobinado.")
+                    except requests.exceptions.RequestException as e:
+                        raise M3u8NetworkingError(
+                            f"Erro de conexão: Não foi possível se conectar ao servidor. Detalhes: {e}")
+
             else:
                 return None
 
@@ -646,10 +727,11 @@ class M3u8Analyzer:
             """
             if not os.path.exists(ffmpeg_bin):
                 raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+                    f"digite o comando : {Fore.LIGHTGREEN_EX}configure-ffmpeg{Style.RESET_ALL}"
+                    f" ,para instalar o ffmpeg em seu ambiente")
 
             if not (url_playlist.startswith('http://') or url_playlist.startswith('https://')):
-                raise ValueError("A URL é inválida!")
+                raise M3u8Error("A URL é inválida!")
 
             resposta = requests.get(url_playlist, headers=headers)
             resposta.raise_for_status()
@@ -699,11 +781,50 @@ class M3u8Analyzer:
                 # Concatena os segmentos em um arquivo de vídeo final
                 M3u8Analyzer.M3u8AnalyzerDownloader.__ffmpeg_concatener(output=output, extension=extens)
 
+            except requests.exceptions.ChunkedEncodingError as e:
+                raise M3u8NetworkingError(f"Erro de codificação em partes: {e}")
+            except requests.exceptions.UnrewindableBodyError:
+                raise M3u8NetworkingError("Erro: Corpo da solicitação não pode ser rebobinado.")
+            except requests.exceptions.RetryError as e:
+                raise M3u8NetworkingError(f"Erro de tentativa: {e}")
+            except requests.exceptions.StreamConsumedError:
+                raise M3u8NetworkingError("Erro: Fluxo de resposta já consumido.")
+            except requests.exceptions.InvalidProxyURL as e:
+                raise M3u8NetworkingError(f"Erro: URL de proxy inválida: {e}")
+            except requests.exceptions.InvalidURL:
+                raise M3u8NetworkingError("Erro: URL inválida fornecida.")
+            except requests.exceptions.InvalidSchema:
+                raise M3u8NetworkingError("Erro: URL inválida, esquema não suportado.")
+            except requests.exceptions.MissingSchema:
+                raise M3u8NetworkingError("Erro: URL inválida, esquema ausente.")
+            except requests.exceptions.InvalidHeader as e:
+                raise M3u8NetworkingError(f"Erro de cabeçalho inválido: {e}")
+            except requests.exceptions.ContentDecodingError as e:
+                raise M3u8NetworkingError(f"Erro de decodificação de conteúdo: {e}")
+            except requests.exceptions.HTTPError as e:
+                raise M3u8NetworkingError(f"Erro HTTP: {e}")
+            except requests.exceptions.ProxyError as e:
+                raise M3u8NetworkingError(f"Erro de proxy: {e}")
+            except requests.exceptions.SSLError as e:
+                raise M3u8NetworkingError(f"Erro SSL: {e}")
+            except requests.exceptions.ConnectionError:
+                raise M3u8NetworkingError("Erro: O servidor ou o servidor encerrou a conexão.")
+            except requests.exceptions.Timeout:
+                raise M3u8NetworkingError(
+                    "Erro de tempo esgotado: A conexão com o servidor demorou muito para responder.")
+            except requests.exceptions.TooManyRedirects:
+                raise M3u8NetworkingError("Erro de redirecionamento: Muitos redirecionamentos.")
+            except requests.exceptions.URLRequired:
+                raise M3u8NetworkingError("Erro: URL é necessária para a solicitação.")
+            except requests.exceptions.RequestException as e:
+                raise M3u8NetworkingError(f"Erro de conexão: Não foi possível se conectar ao servidor. Detalhes: {e}")
             except OSError as e:
                 print(f"Erro ao acessar o sistema de arquivos: {e}")
 
-            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-                print(f"\nErro de conexão: {e}")
+            except ValueError as e:
+                raise M3u8FileError(f"Erro de valor: {e}")
+            except requests.exceptions.BaseHTTPError as e:
+                raise M3u8NetworkingError(f"Erro HTTP básico: {e}")
 
             finally:
                 # Remover arquivos temporários
@@ -764,39 +885,93 @@ class M3u8Analyzer:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                               "Chrome/118.0.0.0 Safari/537.36"
             }
-            if not headers:
-                headers = headers_default
-            resposta = requests.get(url_segmento, headers=headers, stream=True)
-            resposta.raise_for_status()
-            total_bytes = 0
-            chunk_size = 1024  # Definir o tamanho do chunk (1 KB)
-            if logs:
-                print(f"Baixando Segmentos [{index}/{total}]", end=" ")
-            with open(path, 'wb') as arquivo_segmento:
-                for chunk in resposta.iter_content(chunk_size=chunk_size):
-                    if chunk:
-                        arquivo_segmento.write(chunk)
-                        total_bytes += len(chunk)
-                arquivo_segmento.close()
-
-            # Descriptografar se necessário
-            if key and iv:
-                M3u8Analyzer.M3u8AnalyzerDownloader.__descriptografar_segmento(path, key, iv, logs)
-            # Verificar se o vídeo tem áudio e vídeo
-            has_audio = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_audio(path)
-            has_video = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_video(path)
-            if has_audio:
-                Noaudio = None
-            else:
+            try:
+                if not headers:
+                    headers = headers_default
+                resposta = requests.get(url_segmento, headers=headers, stream=True)
+                total_bytes = 0
+                chunk_size = 1024  # Definir o tamanho do chunk (1 KB)
                 if logs:
-                    print(" NOT audio ")
-                Noaudio = True
-            if has_video:
-                Novideo = None
-            else:
-                Novideo = True
-                if logs:
-                    print(" NOT video ")
+                    print(f"Baixando Segmentos [{index}/{total}]", end=" ")
+                with open(path, 'wb') as arquivo_segmento:
+                    for chunk in resposta.iter_content(chunk_size=chunk_size):
+                        if chunk:
+                            arquivo_segmento.write(chunk)
+                            total_bytes += len(chunk)
+                    arquivo_segmento.close()
+                # Descriptografar se necessário
+                if key and iv:
+                    M3u8Analyzer.M3u8AnalyzerDownloader.__descriptografar_segmento(path, key, iv, logs)
+                # Verificar se o vídeo tem áudio e vídeo
+                has_audio = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_audio(path)
+                has_video = M3u8Analyzer.M3u8AnalyzerDownloader.__verificar_video(path)
+                if has_audio:
+                    Noaudio = None
+                else:
+                    if logs:
+                        print(" NOT audio ")
+                    Noaudio = True
+                if has_video:
+                    Novideo = None
+                else:
+                    Novideo = True
+                    if logs:
+                        print(" NOT video ")
+            except FileNotFoundError:
+                raise M3u8FileError(f"Erro: Arquivo ou diretório '{path}' não encontrado.")
+            except PermissionError:
+                raise M3u8FileError(f"Erro: Permissão negada ao tentar acessar '{path}'.")
+            except IsADirectoryError:
+                raise M3u8FileError(f"Erro: '{path}' é um diretório, mas um arquivo era esperado.")
+            except NotADirectoryError:
+                raise M3u8FileError(f"Erro: '{path}' é um arquivo, mas um diretório era esperado.")
+            except BlockingIOError:
+                raise M3u8FileError(f"Erro: Operação de E/S bloqueada ao tentar acessar '{path}'.")
+            except EOFError:
+                raise M3u8FileError(f"Erro: Fim inesperado do arquivo '{path}'.")
+            except requests.exceptions.InvalidProxyURL as e:
+                raise M3u8NetworkingError(f"Erro: URL de proxy inválida: {e}")
+            except requests.exceptions.InvalidURL:
+                raise M3u8NetworkingError("Erro: URL inválida fornecida.")
+            except requests.exceptions.InvalidSchema:
+                raise M3u8NetworkingError("Erro: URL inválida, esquema não suportado.")
+            except requests.exceptions.MissingSchema:
+                raise M3u8NetworkingError("Erro: URL inválida, esquema ausente.")
+            except requests.exceptions.InvalidHeader as e:
+                raise M3u8NetworkingError(f"Erro de cabeçalho inválido: {e}")
+            except ValueError as e:
+                raise M3u8FileError(f"Erro de valor: {e}")
+            except requests.exceptions.ContentDecodingError as e:
+                raise M3u8NetworkingError(f"Erro de decodificação de conteúdo: {e}")
+            except requests.exceptions.BaseHTTPError as e:
+                raise M3u8NetworkingError(f"Erro HTTP básico: {e}")
+            except Exception as e:  # Captura todas as outras exceções, incluindo OSError e IOError
+                raise M3u8FileError(f"Erro inesperado ao manipular arquivo: {e}")
+            except requests.exceptions.SSLError as e:
+                raise M3u8NetworkingError(f"Erro SSL: {e}")
+            except requests.exceptions.ProxyError as e:
+                raise M3u8NetworkingError(f"Erro de proxy: {e}")
+            except requests.exceptions.ConnectionError:
+                raise M3u8NetworkingError("Erro: O servidor ou o servidor encerrou a conexão.")
+            except requests.exceptions.HTTPError as e:
+                raise M3u8NetworkingError(f"Erro HTTP: {e}")
+            except requests.exceptions.Timeout:
+                raise M3u8NetworkingError(
+                    "Erro de tempo esgotado: A conexão com o servidor demorou muito para responder.")
+            except requests.exceptions.TooManyRedirects:
+                raise M3u8NetworkingError("Erro de redirecionamento: Muitos redirecionamentos.")
+            except requests.exceptions.URLRequired:
+                raise M3u8NetworkingError("Erro: URL é necessária para a solicitação.")
+            except requests.exceptions.ChunkedEncodingError as e:
+                raise M3u8NetworkingError(f"Erro de codificação em partes: {e}")
+            except requests.exceptions.StreamConsumedError:
+                raise M3u8NetworkingError("Erro: Fluxo de resposta já consumido.")
+            except requests.exceptions.RetryError as e:
+                raise M3u8NetworkingError(f"Erro de tentativa: {e}")
+            except requests.exceptions.UnrewindableBodyError:
+                raise M3u8NetworkingError("Erro: Corpo da solicitação não pode ser rebobinado.")
+            except requests.exceptions.RequestException as e:
+                raise M3u8NetworkingError(f"Erro de conexão: Não foi possível se conectar ao servidor. Detalhes: {e}")
 
         @staticmethod
         def __descriptografar_segmento(path: str, key: bytes, iv: bytes, logs=None):
@@ -862,16 +1037,16 @@ class M3u8Analyzer:
 
             except FileNotFoundError as e:
                 # Erro ao abrir ou localizar o arquivo
-                raise FileNotFoundError(f"Erro: Arquivo não encontrado - {e}\n")
+                raise M3u8FileError(f"Erro: Arquivo não encontrado - {e}\n")
             except IOError as e:
                 # Erro de I/O durante leitura ou escrita
-                raise IOError(f"Erro de I/O ao acessar o arquivo - {e}\n")
+                raise M3u8FileError(f"Erro de I/O ao acessar o arquivo - {e}\n")
             except ValueError as e:
                 # Erro relacionado ao valor fornecido (por exemplo, chave ou IV incorretos)
-                raise ValueError(f"Erro de valor - {e}\n")
+                raise M3u8FileError(f"Erro de valor - {e}\n")
             except Exception as e:
                 # Captura qualquer outro erro inesperado
-                raise SyntaxError(f"Erro inesperado: {e}\n")
+                raise M3u8Error(f"Erro inesperado: {e}\n")
 
         @staticmethod
         def __verificar_audio(path: str) -> bool:
@@ -973,6 +1148,23 @@ class M3u8Analyzer:
                 time.sleep(0.1)
                 return True  # Indica que o índice deve ser incrementado
             return False  # Indica que o índice não deve ser incrementado
+
+        @staticmethod
+        def __filter_ffmpeg_stdout(line: bytes, filtering: str):
+            """
+            Filtra apenas as linhas que contêm o filtro na saída do ffmpeg.
+            Args:
+                line(bytes): Linha de saída do ffmpeg.
+                filtering(str): o filtro desejado
+            Returns:
+                 o valor da linha
+            """
+            lines = line.decode('utf-8').strip()
+            # Verifica se a linha contém o filtro
+            if re.search(fr'{filtering}', lines):
+                return True
+            else:
+                return False
 
         @staticmethod
         def __ffmpeg_concatener(output: str, extension: str):
@@ -1112,22 +1304,82 @@ class M3u8Analyzer:
             """
             if not os.path.exists(ffmpeg_bin):
                 raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+                    f"Digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente"
+                )
 
-            cmd = ''
             if not isinstance(type_playlist, str):
-                raise SyntaxError("O parâmetro 'type_playlist' é necessário!")
+                raise ValueError("O parâmetro 'type_playlist' deve ser uma string!")
             if type_playlist not in ['audio', 'video']:
-                raise ValueError("É necessário especificar o tipo da playlist: 'audio' ou 'video'")
+                raise ValueError("O parâmetro 'type_playlist' deve ser 'audio' ou 'video'")
 
+            def run_ffmpeg(cmd):
+                process = ''
+                So = M3u8Analyzer.M3u8AnalyzerDownloader.__ocute_terminal()
+                if So == 'w':
+                    # Configura o startupinfo para ocultar o terminal no Windows
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                    # Executa o comando FFmpeg ocultando o terminal
+                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                               startupinfo=startupinfo)
+                elif So == 'l':
+                    # Executa o comando FFmpeg ocultando saídas no terminal Linux
+                    process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+                index = 0
+                while True:
+                    output_line = process.stdout.readline()
+                    if M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_stdout(line=output_line,
+                                                                                  filtering="Stream map 'v:2' matches "
+                                                                                            "no streams."):
+
+                        process.kill()
+                        return False
+                    elif M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_stdout(line=output_line,
+                                                                                    filtering='Error opening input:'):
+                        process.kill()
+                        raise M3u8FfmpegDownloadError("este arquivo de entrada especificado é inválido!")
+                    # Error opening output fil
+                    elif (M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_stdout(line=output_line,
+                                                                                     filtering='Error opening output '
+                                                                                               'file') or M3u8Analyzer.
+                                  M3u8AnalyzerDownloader.__filter_ffmpeg_stdout(line=output_line,
+                                                                                filtering='Unable to choose an '
+                                                                                          'output format for '';'
+                                                                                          ' use'
+                                                                                          ' a standard extension'
+                                                                                          ' for'
+                                                                                          ' the filename or specify'
+                                                                                          ' the format manually')):
+                        process.kill()
+                        raise M3u8FfmpegDownloadError("este arquivo de saída especificado é inválido!")
+
+                    if logs:
+                        clean_output = "\n".join(
+                            line for line in output_line.decode('utf-8').splitlines() if line.strip())
+                        if clean_output:
+                            print(clean_output)
+
+                    if process.poll() is not None and output_line == b'':
+                        break
+                    if logs is None and output_line:
+                        if M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output(output_line, index):
+                            index += 1
+
+                return process.returncode == 0
+
+            # Inicializa o comando FFmpeg
+            cmd = []
+            resolution_map = {}
             if type_playlist == 'video':
                 resolution_map = {
                     'lower': 'v:0',
                     'medium': 'v:1',
                     'high': 'v:2'
                 }
-                video_map = resolution_map.get(resolution,
-                                               'v:2')  # 'high' é o padrão se a resolução não for reconhecida
+                video_map = resolution_map.get(resolution, 'v:2')
                 cmd = [
                     f'{ffmpeg_bin}',
                     '-y',
@@ -1142,8 +1394,7 @@ class M3u8Analyzer:
                     'medium': 'a:1',
                     'high': 'a:2'
                 }
-                audio_map = resolution_map.get(resolution,
-                                               'a:0')  # 'lower' é o padrão se a resolução não for reconhecida
+                audio_map = resolution_map.get(resolution, 'a:0')
                 cmd = [
                     f'{ffmpeg_bin}',
                     '-y',
@@ -1153,34 +1404,19 @@ class M3u8Analyzer:
                     output
                 ]
 
-            process = ''
-            So = M3u8Analyzer.M3u8AnalyzerDownloader.__ocute_terminal()
-            if So == 'w':
-                # Configura o startupinfo para ocultar o terminal no Windows
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                # Executa o comando FFmpeg ocultando o terminal
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                           startupinfo=startupinfo)
-            elif So == 'l':
-                # Executa o comando FFmpeg ocultando saídas no terminal Linux
-                process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            else:
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # Tenta baixar com o mapeamento especificado
+            success = run_ffmpeg(cmd)
 
-            index = 0
-            while True:
-                output_line = process.stdout.readline()
-                if logs:
-                    # Decodificar a saída e remover linhas em branco
-                    clean_output = "\n".join(line for line in output_line.decode('utf-8').splitlines() if line.strip())
-                    if clean_output:
-                        print(clean_output)
-                if process.poll() is not None and output_line == b'':
-                    break
-                if logs is None and output_line:
-                    if M3u8Analyzer.M3u8AnalyzerDownloader.__filter_ffmpeg_output(output_line, index):
-                        index += 1  # Incrementa o índice apenas se a linha corresponder ao filtro
+            # Se falhar devido a mapeamento, tenta sem map
+            if not success:
+                cmd = cmd[:4]  # Remove o mapeamento '-map' e a opção correspondente
+                if type_playlist == 'video':
+                    cmd += ['-c:v', 'copy', output]
+                elif type_playlist == 'audio':
+                    cmd += ['-c:a', 'copy', output]
+                success = run_ffmpeg(cmd)
+                if not success:
+                    raise M3u8FfmpegDownloadError(f"Falha ao baixar o conteúdo com FFmpeg")
 
         @staticmethod
         def remuxer_audio_and_video(
@@ -1232,7 +1468,8 @@ class M3u8Analyzer:
             """
             if not os.path.exists(ffmpeg_bin):
                 raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
+                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg "
+                    f"em seu ambiente")
 
             if not os.path.exists(audioPath) or not os.path.exists(videoPath):
                 raise ValueError("Os caminhos dos arquivos de áudio ou vídeo não foram encontrados...")

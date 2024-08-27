@@ -13,7 +13,7 @@ long_description += "\n\n# CHANGELOG\n\n" + changelog
 
 setup(
     name="m3u8-analyzer",
-    version="1.0.3.3",
+    version="1.0.3.4",
     description="Análise de dados de HLS m3u8",
     long_description=long_description,
     long_description_content_type="text/markdown",
