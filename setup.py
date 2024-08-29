@@ -13,7 +13,7 @@ long_description += "\n\n# CHANGELOG\n\n" + changelog
 
 setup(
     name="m3u8-analyzer",
-    version="1.0.3.4",
+    version="1.0.3.7",
     description="Análise de dados de HLS m3u8",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,12 +23,15 @@ setup(
     license="MIT",
     keywords=["hls", "m3u8", "m3u8_analyzer", "M3u8Analyzer"],
     packages=find_packages(),
-    install_requires=['cryptography', 'requests', 'python-dotenv', 'colorama'],
     include_package_data=True,
-    entry_points={
-        'console_scripts': [
-            'configure-ffmpeg=m3u8_analyzer.__config__:install_bins',
-            'uninstall-ffmpeg=m3u8_analyzer.__config__:uninstall_bins'
-        ],
-    },
+    platforms=["any"],
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Operating System :: OS Independent",
+    ],
 )

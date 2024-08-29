@@ -42,4 +42,3 @@ document.addEventListener('DOMContentLoaded', () => {
       codeBlock.appendChild(wrapper);
     });
   });
-  

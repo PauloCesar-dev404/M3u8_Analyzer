@@ -6,27 +6,20 @@ import subprocess
 import sys
 import time
 from typing import List, Dict, Tuple
-
 import requests
 from colorama import Fore, Style
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
 from .__config__ import Configurate
 from .exeptions import M3u8Error, M3u8NetworkingError, M3u8FileError, M3u8FfmpegDownloadError
 
 parser = Configurate()
-data = parser.loader()
 parser.configure()
-# Definições das variáveis
-STATUS = data.get('STATUS')
-FFMPEG_URL = data.get('FFMPEG_URL')
-INSTALL_DIR = data.get('INSTALL_DIR')  # Valor padrão se não definido
-FFMPEG_BINARY = data.get('FFMPEG_BINARY')
-VERSION = data.get('VERSION')
+INSTALL_DIR = os.getenv('INSTALL_DIR')
+FFMPEG_BINARY = os.getenv('FFMPEG_BINARY')
+__version__ = parser.VERSION
 __author__ = 'PauloCesar0073-dev404'
-__version__ = VERSION
 __ossystem = os.name
 HOME = INSTALL_DIR
 ffmpeg_bin = fr'{INSTALL_DIR}\{FFMPEG_BINARY}'
@@ -725,10 +718,8 @@ class M3u8Analyzer:
                 - Se ocorrer um erro durante a requisição HTTP ou o processo de concatenação, o método tentará remover arquivos temporários criados.
                 - A chave e o IV fornecidos são usados para descriptografar os segmentos se fornecidos; caso contrário, os segmentos são baixados diretamente.
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"digite o comando : {Fore.LIGHTGREEN_EX}configure-ffmpeg{Style.RESET_ALL}"
-                    f" ,para instalar o ffmpeg em seu ambiente")
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
 
             if not (url_playlist.startswith('http://') or url_playlist.startswith('https://')):
                 raise M3u8Error("A URL é inválida!")
@@ -1059,10 +1050,8 @@ class M3u8Analyzer:
             Returns:
                  bool: True se o vídeo contiver áudio, False caso contrário.
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
-
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
             try:
                 # Comando para obter informações sobre o arquivo usando ffmpeg
                 resultado = subprocess.run(
@@ -1092,10 +1081,8 @@ class M3u8Analyzer:
             Returns:
                 bool: True se o vídeo contiver vídeo, False caso contrário.
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
-
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
             try:
                 # Comando para obter informações sobre o arquivo usando ffmpeg
                 resultado = subprocess.run(
@@ -1178,10 +1165,8 @@ class M3u8Analyzer:
             Returns:
                 None
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
-
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
             # Defina o nome do arquivo de lista
             arquivo_lista = fr'{temp_dir}\lista.txt'
 
@@ -1302,15 +1287,12 @@ class M3u8Analyzer:
                 - A saída do FFmpeg pode ser controlada com o parâmetro `logs`, que, se definido como True, exibe as mensagens de progresso e erros.
 
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"Digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente"
-                )
-
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
             if not isinstance(type_playlist, str):
-                raise ValueError("O parâmetro 'type_playlist' deve ser uma string!")
+                raise M3u8Error("O parâmetro 'type_playlist' deve ser uma string!")
             if type_playlist not in ['audio', 'video']:
-                raise ValueError("O parâmetro 'type_playlist' deve ser 'audio' ou 'video'")
+                raise M3u8Error("O parâmetro 'type_playlist' deve ser 'audio' ou 'video'")
 
             def run_ffmpeg(cmd):
                 process = ''
@@ -1466,13 +1448,11 @@ class M3u8Analyzer:
                 - A remoção dos arquivos de áudio e vídeo de entrada após o remuxing é tentada, mas qualquer falha na remoção é ignorada.
                 - O comportamento da exibição de logs é controlado pelo parâmetro `logs`. Se `logs` for True, as mensagens de saída do FFmpeg são impressas no console.
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg "
-                    f"em seu ambiente")
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
 
             if not os.path.exists(audioPath) or not os.path.exists(videoPath):
-                raise ValueError("Os caminhos dos arquivos de áudio ou vídeo não foram encontrados...")
+                raise M3u8Error("Os caminhos dos arquivos de áudio ou vídeo não foram encontrados...")
 
             cmd = [
                 ffmpeg_bin,
@@ -1568,12 +1548,10 @@ class M3u8Analyzer:
                 - Se `callback` for fornecido, a função será chamada com cada linha de saída do FFmpeg, permitindo processamento personalizado da saída.
                 - O método é capaz de ocultar a janela do terminal no Windows e suprimir a saída no Linux conforme a configuração do terminal.
             """
-            if not os.path.exists(ffmpeg_bin):
-                raise Warning(
-                    f"digite o comando : {Fore.LIGHTBLUE_EX}configure-ffmpeg{Style.RESET_ALL} ,para instalar o ffmpeg em seu ambiente")
-
+            if not M3u8Analyzer.M3u8AnalyzerDownloader.__verific_path_bin(binPath=ffmpeg_bin, typePath='file'):
+                parser.install_bins()
             if not isinstance(commands, list):
-                raise TypeError("O parâmetro 'commands' deve ser uma lista.")
+                raise M3u8Error("O parâmetro 'commands' deve ser uma lista.")
 
             # Adiciona o binário FFmpeg no início da lista de comandos
             cmd = [ffmpeg_bin] + commands
@@ -1634,6 +1612,30 @@ class M3u8Analyzer:
                 return 'l'
             else:
                 return 'null'
+
+        @staticmethod
+        def __verific_path_bin(binPath, typePath):
+            """
+                    Esta função verifica se um caminho de arquivo ou diretório existe
+                    e retorna True ou False.
+
+                    Args:
+                        binPath (str): O caminho a ser verificado.
+                        typePath (str): O tipo de caminho a verificar ('file' para arquivo, 'dir' para diretório).
+
+                    Returns:
+                        bool: True se o caminho existir e for do tipo especificado, False caso contrário.
+                    """
+
+            if typePath == 'file':
+                # Verifica se o caminho existe e é um arquivo
+                return os.path.isfile(binPath)
+            elif typePath == 'dir':
+                # Verifica se o caminho existe e é um diretório
+                return os.path.isdir(binPath)
+            else:
+                # Retorna False se o tipo de caminho não for 'file' ou 'dir'
+                return False
 
 
 class M3U8Playlist:
