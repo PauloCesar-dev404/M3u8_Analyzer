@@ -141,15 +141,26 @@ class Configurate:
             raise M3u8NetworkingError(f"Erro de conexão: Não foi possível se conectar ao servidor. Detalhes: {e}")
 
     def __extract_zip(self, zip_path: str, extract_to: str):
-        """Descompacta o arquivo ZIP no diretório especificado."""
+        """Descompacta o arquivo ZIP no diretório especificado e ajusta permissões de arquivos e diretórios."""
         try:
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(extract_to)
+
+            # Ajustar permissões de todos os arquivos e diretórios extraídos
+            for root, dirs, files in os.walk(extract_to):
+                for dir_name in dirs:
+                    dir_path = os.path.join(root, dir_name)
+                    os.chmod(dir_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+
+                for file_name in files:
+                    file_path = os.path.join(root, file_name)
+                    os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
         except zipfile.BadZipFile as e:
             sys.stderr.write(f"Erro ao descompactar o arquivo: {e}\n")
             raise
         finally:
+            # Remover o arquivo ZIP original após a extração
             os.remove(zip_path)
 
     def __remove_file(self, file_path: str):
@@ -181,8 +192,6 @@ class Configurate:
         self.__extract_zip(zip_path, self.INSTALL_DIR)
         # Remover o arquivo ZIP
         self.__remove_file(zip_path)
-        ## addpath
-        bina = os.path.join(self.INSTALL_DIR, self.FFMPEG_BINARY)
 
     def __handle_remove_readonly(self, func, path, exc_info):
         """Função de callback para lidar com arquivos somente leitura."""

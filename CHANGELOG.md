@@ -1,4 +1,4 @@
-![Versão](https://img.shields.io/badge/version-1.0.3.7-orange)
+![Versão](https://img.shields.io/badge/version-1.0.4.1-orange)
 
 -
 ---
@@ -9,9 +9,8 @@
 ### ![Bugs](https://img.shields.io/badge/status-bugs-red)
 - Para reportar bugs, [clique aqui](https://github.com/PauloCesar-dev404/M3u8_Analyzer/issues).
 ---
-### ![Melhorias](https://img.shields.io/badge/status-melhorias-yellow)
-- 
----
 ![Novas Funcionalidades](https://img.shields.io/badge/status-novas_funcionalidades-blue)
 
-- 
+- [x] `Wrapper`: para parsear de maneria limpa playlists m3u8
+- [x] `EncryptSuport`: Separado a lógica para suporte a criptografia AES-128
+- [x] `M3u8Downloader`: Soporte a downloads de playlists (requer **ffmpeg**)

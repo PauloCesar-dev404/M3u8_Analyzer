@@ -13,7 +13,7 @@ long_description += "\n\n# CHANGELOG\n\n" + changelog
 
 setup(
     name="m3u8-analyzer",
-    version="1.0.3.7",
+    version="1.0.4.1",
     description="Análise de dados de HLS m3u8",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,6 +23,7 @@ setup(
     license="MIT",
     keywords=["hls", "m3u8", "m3u8_analyzer", "M3u8Analyzer"],
     packages=find_packages(),
+    install_requires=['colorama', 'requests', 'cryptography'],
     include_package_data=True,
     platforms=["any"],
     classifiers=[
