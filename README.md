@@ -4,7 +4,7 @@
 ![Versão](https://img.shields.io/badge/version-1.0.4.1-orange)
 ![Licença](https://img.shields.io/badge/license-MIT-orange)![Estrelas](https://img.shields.io/github/stars/PauloCesar-dev404/M3u8_Analyzer?style=social)
 ![Downloads](https://img.shields.io/pypi/dm/m3u8-analyzer)
-[![Sponsor](https://img.shields.io/badge/💲Donate-yellow)](https://apoia.se/paulocesar-dev404)
+[![Sponsor](https://img.shields.io/badge/💲Donate-yellow)](https://paulocesar-dev404.github.io/me-apoiando-online/)
 [![Sponsor](https://img.shields.io/badge/Documentação-green)](https://paulocesar-dev404.github.io/M3u8_Analyzer/)
 
 
